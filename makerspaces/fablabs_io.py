@@ -16,32 +16,31 @@ fablabs_io_api_url = "https://api.fablabs.io/v0/labs.json"
 class FabLab(object):
 	"""Represents a Fab Lab as it is described on fablabs.io."""
 	
-	def __init__(self, address_1, address_2, address_notes, avatar, blurb, capabilities, city, country_coude, county, description, email, header_image_src, id, kind_name, latitude, longitude, links, name, parent_id, phone, postal_code, slug, url):
-		self.address_1 = address_1
-		self.address_2 = address_2
-		self.address_notes = address_notes
-		self.avatar = avatar
-		self.blurb = blurb
-		self.capabilities = capabilities
-		self.city = city
-		self.country_code = country_code
-		self.county = county
-		self.description = description
-		self.email = email
-		self.header_image_src = header_image_src
-		self.id = id
-		self.kind_name = kind_name
-		self.latitude = latitude
-		self.longitude = longitude
-		self.links = links
-		self.name = name
-		self.parent_id = parent_id
-		self.phone = phone
-		self.postal_code = postal_code
-		self.slug = slug
-		self.url = url
-        
-	
+	def __init__(self):
+	    self.address_1 = ""
+	    self.address_2 = ""
+	    self.address_notes = ""
+	    self.avatar = ""
+	    self.blurb = ""
+	    self.capabilities = ""
+	    self.city = ""
+	    self.country_code = ""
+	    self.county = ""
+	    self.description = ""
+	    self.email = ""
+	    self.header_image_src = ""
+	    self.id = ""
+	    self.kind_name = ""
+	    self.latitude = ""
+	    self.longitude = ""
+	    self.links = ""
+	    self.name = ""
+	    self.parent_id = ""
+	    self.phone = ""
+	    self.postal_code = ""
+	    self.slug = ""
+	    self.url = ""
+
         
      
 def data_from_fablabs_io():
@@ -50,6 +49,44 @@ def data_from_fablabs_io():
 	fablab_list = requests.get(fablabs_io_api_url).json()
 	
 	return fablab_list
+	
+	
+def get_fablabs():
+	"""Gets FabLab data from fablabs.io."""
+
+	fablabs_json = data_from_fablabs_io()
+	fablabs = {}
+	
+	# Load all the FabLabs
+	for i in fablabs_json["labs"]:
+		current_lab = FabLab()
+		current_lab.address_1 = i["address_1"]
+		current_lab.address_2 = i["address_2"]
+		current_lab.address_notes = i["address_notes"]
+		current_lab.avatar = i["avatar"]
+		current_lab.blurb = i["blurb"]
+		current_lab.capabilities = i["capabilities"]
+		current_lab.city = i["city"]
+		current_lab.country_code = i["country_code"]
+		current_lab.county = i["county"]
+		current_lab.description = i["description"]
+		current_lab.email = i["email"]
+		current_lab.header_image_src = i["header_image_src"]
+		current_lab.id = i["id"]
+		current_lab.kind_name = i["kind_name"]
+		current_lab.latitude = i["latitude"]
+		current_lab.longitude = i["longitude"]
+		current_lab.links = i["links"]
+		current_lab.name = i["name"]
+		current_lab.parent_id = i["parent_id"]
+		current_lab.phone = i["phone"]
+		current_lab.postal_code = i["postal_code"]
+		current_lab.slug = i["slug"]
+		current_lab.url = i["url"]
+		
+		fablabs[i["slug"]] = current_lab
+	
+	return fablabs
 
 	
 def fablabs_count():
@@ -61,4 +98,5 @@ def fablabs_count():
 
 
 if __name__ == "__main__":
-	print fablabs_count()
+	a = get_fablabs()
+	print a["ouagalab"].name
