@@ -17,32 +17,30 @@ class FabLab(object):
 	"""Represents a Fab Lab as it is described on fablabs.io."""
 	
 	def __init__(self):
-	    self.address_1 = ""
-	    self.address_2 = ""
-	    self.address_notes = ""
-	    self.avatar = ""
-	    self.blurb = ""
-	    self.capabilities = ""
-	    self.city = ""
-	    self.country_code = ""
-	    self.county = ""
-	    self.description = ""
-	    self.email = ""
-	    self.header_image_src = ""
-	    self.id = ""
-	    self.kind_name = ""
-	    self.latitude = ""
-	    self.longitude = ""
-	    self.links = ""
-	    self.name = ""
-	    self.parent_id = ""
-	    self.phone = ""
-	    self.postal_code = ""
-	    self.slug = ""
-	    self.url = ""
+		self.address_1 = ""
+		self.address_2 = ""
+		self.address_notes = ""
+		self.avatar = ""
+		self.blurb = ""
+		self.capabilities = ""
+		self.city = ""
+		self.country_code = ""
+		self.county = ""
+		self.description = ""
+		self.email = ""
+		self.header_image_src = ""
+		self.id = ""
+		self.kind_name = ""
+		self.latitude = ""
+		self.longitude = ""
+		self.links = ""
+		self.name = ""
+		self.parent_id = ""
+		self.phone = ""
+		self.postal_code = ""
+		self.slug = ""
+		self.url = ""
 
-        
-     
 def data_from_fablabs_io():
 	"""Gets data from fablabs.io."""
 
@@ -83,11 +81,20 @@ def get_fablabs():
 		current_lab.postal_code = i["postal_code"]
 		current_lab.slug = i["slug"]
 		current_lab.url = i["url"]
-		
 		fablabs[i["slug"]] = current_lab
 	
 	return fablabs
 
+def get_fablabs_dict():
+	"""Gets the Fab Labs from fablabs.io as dictionaries instead of FabLab objects."""
+	fablab_data = get_fablabs()
+	fablabs = {}
+	
+	# Load all the FabLabs
+	for i in fablab_data:
+		fablabs[i] = fablab_data[i].__dict__
+		
+	return fablabs
 	
 def fablabs_count():
 	"""Gets the number of current Fab Labs registered on fablabs.io."""
@@ -98,5 +105,11 @@ def fablabs_count():
 
 
 if __name__ == "__main__":
+	# Debug
 	a = get_fablabs()
 	print a["ouagalab"].name
+	print a["ouagalab"].city
+	b = data_from_fablabs_io()
+	c = fablabs_count()
+	print c
+	#print get_fablabs_dict()
