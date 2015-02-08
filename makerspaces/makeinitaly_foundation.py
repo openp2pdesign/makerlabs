@@ -14,34 +14,25 @@ from simplemediawiki import MediaWiki
 makeinitaly__foundation_api_url = "http://makeinitaly.foundation/wiki/api.php"
 
 
-class FabLab(object):
-	"""Represents a Fab Lab as it is described on fablabs.io."""
+class Lab(object):
+	"""Represents a Lab as it is described on makeinitaly.foundation."""
 	
 	def __init__(self):
-		self.address_1 = ""
-		self.address_2 = ""
-		self.address_notes = ""
-		self.avatar = ""
-		self.blurb = ""
-		self.capabilities = ""
+		self.long = ""
+		self.lat = ""
+		self.coordinates = ""
+		self.province = ""
+		self.region = ""
+		self.address = ""
 		self.city = ""
-		self.country_code = ""
-		self.county = ""
-		self.description = ""
+		self.fablabsio = ""
+		self.website = ""
+		self.facebook = ""
+		self.twitter = ""
 		self.email = ""
-		self.header_image_src = ""
-		self.id = ""
-		self.kind_name = ""
-		self.latitude = ""
-		self.longitude = ""
-		self.links = ""
-		self.name = ""
-		self.parent_id = ""
-		self.phone = ""
-		self.postal_code = ""
-		self.slug = ""
-		self.url = ""
-
+		self.manager = ""
+		self.birthyear = ""
+		
 
 def get_single_lab(lab_slug):
 	"""Gets data from a single lab from makeinitaly.foundation."""
@@ -50,15 +41,74 @@ def get_single_lab(lab_slug):
 	
 	# If we don't know the pageid...
 	for i in wiki_response["query"]["pages"]:
-		result = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
+		content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
 	
-	newstr01 = result.replace("}}", "")
+	# Clean the resulting string/list
+	newstr01 = content.replace("}}", "")
 	newstr02 = newstr01.replace("{{", "")
-	print newstr02
 	result = newstr02.rstrip("\n|").split("\n|")
 	result.remove(u'FabLab')
 	
-	return result
+	# Transform the data into a Lab object
+	currentlab = Lab()
+	currentlab.coordinates = ""
+	currentlab.long = ""
+	currentlab.lat = ""
+	currentlab.province = ""
+	currentlab.region = ""
+	currentlab.address = ""
+	currentlab.city = ""
+	currentlab.fablabsio = ""
+	currentlab.website = ""
+	currentlab.facebook = ""
+	currentlab.twitter = ""
+	currentlab.email = ""
+	currentlab.manager = ""
+	currentlab.birthyear = ""
+	
+	# Add existing data
+	for i in result:
+		if "coordinates=" in i:
+			value = i.replace("coordinates=", "")
+			currentlab.coordinates = value
+			latlong = value.rstrip(", ").split(", ")
+			currentlab.lat = latlong[0]
+			currentlab.long = latlong[1]
+		elif "province=" in i:
+			value = i.replace("province=", "")
+			currentlab.province = value
+		elif "region=" in i:
+			value = i.replace("region=", "")
+			currentlab.region = value
+		elif "address=" in i:
+			value = i.replace("address=", "")
+			currentlab.address = value
+		elif "city=" in i:
+			value = i.replace("city=", "")
+			currentlab.city = value
+		elif "fablabsio=" in i:
+			value = i.replace("fablabsio=", "")
+			currentlab.fablabsio = value
+		elif "website=" in i:
+			value = i.replace("website=", "")
+			currentlab.website = value
+		elif "facebook=" in i:
+			value = i.replace("facebook=", "")
+			currentlab.facebook = value
+		elif "twitter=" in i:
+			value = i.replace("twitter=", "")
+			currentlab.twitter = value
+		elif "email=" in i:
+			value = i.replace("email=", "")
+			currentlab.email = value
+		elif "manager=" in i:
+			value = i.replace("manager=", "")
+			currentlab.manager = value
+		elif "birthyear=" in i:
+			value = i.replace("birthyear=", "")
+			currentlab.birthyear = value
+
+	return currentlab
 
 
 def data_from_makeinitaly_foundation():
@@ -108,6 +158,13 @@ def get_fablabs():
 	
 	return fablabs
 
+def get_lab_dict(slug):
+	"""Gets a Lab from makeinitaly.foundation as dictionariy instead of Lab object."""
+	
+	labdict = get_single_lab("WeMake").__dict__
+		
+	return labdict
+
 def get_fablabs_dict():
 	"""Gets the Fab Labs from fablabs.io as dictionaries instead of FabLab objects."""
 	fablab_data = get_fablabs()
@@ -131,7 +188,7 @@ if __name__ == "__main__":
 	# Debug
 	#a = data_from_makeinitaly_foundation()
 	#print a["query"]["categorymembers"]
-	b = get_single_lab("WeMake")
+	b = get_lab_dict("WeMake")
 	print b
 	#a = get_fablabs()
 	#print a["ouagalab"].name
