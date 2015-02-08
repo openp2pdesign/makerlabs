@@ -34,7 +34,7 @@ class Lab(object):
 		self.birthyear = ""
 		
 
-def get_single_lab(lab_slug):
+def get_single_lab(lab_slug, data_format):
 	"""Gets data from a single lab from makeinitaly.foundation."""
 	wiki = MediaWiki(makeinitaly__foundation_api_url)
 	wiki_response = wiki.call({'action': 'query', 'titles':lab_slug, 'prop': 'revisions', 'rvprop': 'content'})
@@ -50,27 +50,27 @@ def get_single_lab(lab_slug):
 	result.remove(u'FabLab')
 	
 	# Transform the data into a Lab object
-	currentlab = Lab()
-	currentlab.coordinates = ""
-	currentlab.long = ""
-	currentlab.lat = ""
-	currentlab.province = ""
-	currentlab.region = ""
-	currentlab.address = ""
-	currentlab.city = ""
-	currentlab.fablabsio = ""
-	currentlab.website = ""
-	currentlab.facebook = ""
-	currentlab.twitter = ""
-	currentlab.email = ""
-	currentlab.manager = ""
-	currentlab.birthyear = ""
+	current_lab = Lab()
+	current_lab.coordinates = ""
+	current_lab.long = ""
+	current_lab.lat = ""
+	current_lab.province = ""
+	current_lab.region = ""
+	current_lab.address = ""
+	current_lab.city = ""
+	current_lab.fablabsio = ""
+	current_lab.website = ""
+	current_lab.facebook = ""
+	current_lab.twitter = ""
+	current_lab.email = ""
+	current_lab.manager = ""
+	current_lab.birthyear = ""
 	
 	# Add existing data
 	for i in result:
 		if "coordinates=" in i:
 			value = i.replace("coordinates=", "")
-			currentlab.coordinates = value
+			current_lab.coordinates = value
 			latlong = []
 			if ", " in value:
 				latlong = value.rstrip(", ").split(", ")
@@ -78,46 +78,49 @@ def get_single_lab(lab_slug):
 				latlong = value.rstrip(" , ").split(" , ")
 			else:
 				latlong = ["",""]
-			currentlab.lat = latlong[0]
-			currentlab.long = latlong[1]
+			current_lab.lat = latlong[0]
+			current_lab.long = latlong[1]
 		elif "province=" in i:
 			value = i.replace("province=", "")
-			currentlab.province = value.upper()
+			current_lab.province = value.upper()
 		elif "region=" in i:
 			value = i.replace("region=", "")
-			currentlab.region = value
+			current_lab.region = value
 		elif "address=" in i:
 			value = i.replace("address=", "")
-			currentlab.address = value
+			current_lab.address = value
 		elif "city=" in i:
 			value = i.replace("city=", "")
-			currentlab.city = value
+			current_lab.city = value
 		elif "fablabsio=" in i:
 			value = i.replace("fablabsio=", "")
-			currentlab.fablabsio = value
+			current_lab.fablabsio = value
 		elif "website=" in i:
 			value = i.replace("website=", "")
-			currentlab.website = value
+			current_lab.website = value
 		elif "facebook=" in i:
 			value = i.replace("facebook=", "")
-			currentlab.facebook = value
+			current_lab.facebook = value
 		elif "twitter=" in i:
 			value = i.replace("twitter=", "")
-			currentlab.twitter = value
+			current_lab.twitter = value
 		elif "email=" in i:
 			value = i.replace("email=", "")
-			currentlab.email = value
+			current_lab.email = value
 		elif "manager=" in i:
 			value = i.replace("manager=", "")
-			currentlab.manager = value
+			current_lab.manager = value
 		elif "birthyear=" in i:
 			value = i.replace("birthyear=", "")
-			currentlab.birthyear = value
+			current_lab.birthyear = value
 
-	return currentlab
+		if data_format == "dict":
+			return current_lab.__dict__
+		elif data_format == "object":
+			return current_lab
 	
 	
-def get_labs():
+def get_labs(data_format):
 	"""Gets data from all labs from makeinitaly.foundation."""
 
 	wiki = MediaWiki(makeinitaly__foundation_api_url)
@@ -129,25 +132,19 @@ def get_labs():
 	labs = {}
 	# Load all the Labs
 	for i in urls:
-		current_lab = get_single_lab(i)
-		labs[i] = current_lab
+		current_lab = get_single_lab(i,data_format)
+		labs[i] = current_lab		
 	
 	return labs
 
-def get_lab_dict(slug):
-	"""Gets a Lab from makeinitaly.foundation as dictionariy instead of Lab object."""
-	
-	labdict = get_single_lab("WeMake").__dict__
-		
-	return labdict
 	
 def labs_count():
 	"""Gets the number of current Labs registered on makeinitaly.foundation."""
 	
-	#fablabs = data_from_fablabs_io()
+	labs = get_labs(data_format="dict")
 	
-	#return len(fablabs["labs"])
-	return
+	return len(labs)
+	
 
 if __name__ == "__main__":
 	# Debug
@@ -155,7 +152,7 @@ if __name__ == "__main__":
 	#print a["query"]["categorymembers"]
 	#b = get_lab_dict("WeMake")
 	#print b
-	d = get_labs()
+	print get_labs(data_format="dict")
 	#a = get_fablabs()
 	#print a["ouagalab"].name
 	#print a["ouagalab"].city
