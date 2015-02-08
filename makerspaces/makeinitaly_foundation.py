@@ -71,12 +71,18 @@ def get_single_lab(lab_slug):
 		if "coordinates=" in i:
 			value = i.replace("coordinates=", "")
 			currentlab.coordinates = value
-			latlong = value.rstrip(", ").split(", ")
+			latlong = []
+			if ", " in value:
+				latlong = value.rstrip(", ").split(", ")
+			elif " , " in value:
+				latlong = value.rstrip(" , ").split(" , ")
+			else:
+				latlong = ["",""]
 			currentlab.lat = latlong[0]
 			currentlab.long = latlong[1]
 		elif "province=" in i:
 			value = i.replace("province=", "")
-			currentlab.province = value
+			currentlab.province = value.upper()
 		elif "region=" in i:
 			value = i.replace("region=", "")
 			currentlab.region = value
@@ -109,54 +115,24 @@ def get_single_lab(lab_slug):
 			currentlab.birthyear = value
 
 	return currentlab
-
-
-def data_from_makeinitaly_foundation():
-	"""Gets data from all labs from makeinitaly.foundation."""
 	
+	
+def get_labs():
+	"""Gets data from all labs from makeinitaly.foundation."""
+
 	wiki = MediaWiki(makeinitaly__foundation_api_url)
 	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Italian_FabLabs','cmlimit': '500'})
+	urls = []
 	for i in wiki_response["query"]["categorymembers"]:
-		print i["title"].replace(" ", "%20");
+		urls.append(i["title"].replace(" ", "_"))
 	
-	return wiki_response
+	labs = {}
+	# Load all the Labs
+	for i in urls:
+		current_lab = get_single_lab(i)
+		labs[i] = current_lab
 	
-	
-def get_fablabs():
-	"""Gets FabLab data from fablabs.io."""
-
-	fablabs_json = data_from_fablabs_io()
-	fablabs = {}
-	
-	# Load all the FabLabs
-	for i in fablabs_json["labs"]:
-		current_lab = FabLab()
-		current_lab.address_1 = i["address_1"]
-		current_lab.address_2 = i["address_2"]
-		current_lab.address_notes = i["address_notes"]
-		current_lab.avatar = i["avatar"]
-		current_lab.blurb = i["blurb"]
-		current_lab.capabilities = i["capabilities"]
-		current_lab.city = i["city"]
-		current_lab.country_code = i["country_code"]
-		current_lab.county = i["county"]
-		current_lab.description = i["description"]
-		current_lab.email = i["email"]
-		current_lab.header_image_src = i["header_image_src"]
-		current_lab.id = i["id"]
-		current_lab.kind_name = i["kind_name"]
-		current_lab.latitude = i["latitude"]
-		current_lab.longitude = i["longitude"]
-		current_lab.links = i["links"]
-		current_lab.name = i["name"]
-		current_lab.parent_id = i["parent_id"]
-		current_lab.phone = i["phone"]
-		current_lab.postal_code = i["postal_code"]
-		current_lab.slug = i["slug"]
-		current_lab.url = i["url"]
-		fablabs[i["slug"]] = current_lab
-	
-	return fablabs
+	return labs
 
 def get_lab_dict(slug):
 	"""Gets a Lab from makeinitaly.foundation as dictionariy instead of Lab object."""
@@ -164,32 +140,22 @@ def get_lab_dict(slug):
 	labdict = get_single_lab("WeMake").__dict__
 		
 	return labdict
-
-def get_fablabs_dict():
-	"""Gets the Fab Labs from fablabs.io as dictionaries instead of FabLab objects."""
-	fablab_data = get_fablabs()
-	fablabs = {}
 	
-	# Load all the FabLabs
-	for i in fablab_data:
-		fablabs[i] = fablab_data[i].__dict__
-		
-	return fablabs
+def labs_count():
+	"""Gets the number of current Labs registered on makeinitaly.foundation."""
 	
-def fablabs_count():
-	"""Gets the number of current Fab Labs registered on fablabs.io."""
+	#fablabs = data_from_fablabs_io()
 	
-	fablabs = data_from_fablabs_io()
-	
-	return len(fablabs["labs"])
-
+	#return len(fablabs["labs"])
+	return
 
 if __name__ == "__main__":
 	# Debug
 	#a = data_from_makeinitaly_foundation()
 	#print a["query"]["categorymembers"]
-	b = get_lab_dict("WeMake")
-	print b
+	#b = get_lab_dict("WeMake")
+	#print b
+	d = get_labs()
 	#a = get_fablabs()
 	#print a["ouagalab"].name
 	#print a["ouagalab"].city
