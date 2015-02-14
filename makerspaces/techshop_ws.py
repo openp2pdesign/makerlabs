@@ -10,6 +10,7 @@
 
 from bs4 import BeautifulSoup
 import requests
+import re
 #Requirement: beautifulsoup4
 
 techshop_url = "http://techshop.ws/locations.html"
@@ -68,7 +69,6 @@ def get_labs():
     for i in labs:
         if labs[i].url != "":
             get_single_lab(labs[i].url)
-        exit()
     
     return labs
     
@@ -78,8 +78,24 @@ def get_single_lab(slug):
     
     r = requests.get(slug)
     soup = BeautifulSoup(r.content)
-    print soup.prettify()
-
+    #print soup.prettify()
+    
+    
+    #columns = soup.findAll('span', text = re.compile('Contact Us'))
+    
+    # Get the phone
+    item = soup.findAll('strong', text = re.compile('Phone'))
+    phonedata = item[0].next_sibling.next_sibling
+    phonedata = str(phonedata)
+    phonestring = phonedata.strip()
+    
+    if len(phonestring) == 0:
+        phonedata = item[0].next_sibling.next_sibling.next_sibling
+        phonedata = str(phonedata.text)
+        phonestring = phonedata.strip()
+        
+    print phonestring
+    
     return
 
     
