@@ -12,7 +12,7 @@ from simplemediawiki import MediaWiki
 #Requirement: kitchen
 import mwparserfromhell
 
-makeinitaly__foundation_api_url = "http://hackerspaces.org/w/api.php"
+hackerspaces_org_api_url = "http://hackerspaces.org/w/api.php"
 
 
 class Lab(object):
@@ -55,13 +55,18 @@ class Lab(object):
 
 def get_single_lab(lab_slug, data_format):
 	"""Gets data from a single lab from makeinitaly.foundation."""
-	wiki = MediaWiki(makeinitaly__foundation_api_url)
+	wiki = MediaWiki(hackerspaces_org_api_url)
 	wiki_response = wiki.call({'action': 'query', 'titles':lab_slug, 'prop': 'revisions', 'rvprop': 'content'})
 	
 	# If we don't know the pageid...
 	for i in wiki_response["query"]["pages"]:
 		content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
-		
+	
+	# Transform the data into a Lab object
+	current_lab = Lab()
+	
+	equipment_list = []
+	
 	# Parse the Mediawiki code	
 	wikicode = mwparserfromhell.parse(content)
 	for k in wikicode.filter_templates():
@@ -73,15 +78,22 @@ def get_single_lab(lab_slug, data_format):
 			#	print str(j)
 		elif "Equipment" in element_name:
 			value = k.params[0].replace("equipment=", "")
+			equipment_list.append(value)
 	
+	current_lab.equipment = equipment_list
+			
+	# Load the free text
+	freetext = ""
+	for k in wikicode._nodes:
+		try:
+			test_value = k.name
+		except AttributeError:
+			freetext += unicode(k)
+	print freetext
+	current_lab.text = freetext
 	exit()
-	# Clean the resulting string/list
-	#newstr01 = content.replace("}}", "")
-	#newstr02 = newstr01.replace("{{", "")
-	#result = newstr02.rstrip("\n|").split("\n|")
 	
-	# Transform the data into a Lab object
-	current_lab = Lab()
+	
 	
 	result = []
 	
@@ -142,7 +154,7 @@ def get_single_lab(lab_slug, data_format):
 def get_labs(data_format):
 	"""Gets data from all labs from makeinitaly.foundation."""
 
-	wiki = MediaWiki(makeinitaly__foundation_api_url)
+	wiki = MediaWiki(hackerspaces_org_api_url)
 	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '500'})
 	urls = []
 	for i in wiki_response["query"]["categorymembers"]:
