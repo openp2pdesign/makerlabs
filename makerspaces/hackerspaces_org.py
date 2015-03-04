@@ -72,7 +72,7 @@ def get_single_lab(lab_slug, data_format):
 	# Parse the Mediawiki code	
 	wikicode = mwparserfromhell.parse(content)
 	for k in wikicode.filter_templates():
-		element_name = str(k.name)
+		element_name = unicode(k.name)
 		if "Hackerspace" in element_name:
 			for j in k.params:
 				if unicode(j.name) == "logo":
@@ -146,8 +146,8 @@ def get_single_lab(lab_slug, data_format):
 				if unicode(j.name) == "post-office-box":
 					current_lab.post_office_box = unicode(j.value)
 		elif "Equipment" in element_name:
-			value = k.params[0].replace("equipment=", "")
-			equipment_list.append(value)
+			for j in k.params:
+				equipment_list.append(j.replace("equipment=", ""))
 	
 	current_lab.equipment = equipment_list
 			
@@ -179,7 +179,6 @@ def get_labs(data_format):
 	# Load all the Labs
 	for i in urls:
 		current_lab = get_single_lab(i,data_format)
-		print current_lab
 		labs[i] = current_lab		
 	
 	return labs
