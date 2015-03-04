@@ -24,7 +24,9 @@ class Lab(object):
 		self.state=""
 		self.city=""
 		self.founding=""
-		self.coordinate=""
+		self.coordinates=""
+		self.lat=""
+		self.long=""
 		self.membercount=""
 		self.fee=""
 		self.size=""
@@ -73,9 +75,76 @@ def get_single_lab(lab_slug, data_format):
 		element_name = str(k.name)
 		if "Hackerspace" in element_name:
 			for j in k.params:
-				print unicode(j.name), unicode(j.value)
-			#for j in k.params:
-			#	print str(j)
+				if unicode(j.name) == "logo":
+					current_lab.logo = unicode(j.value)
+				if unicode(j.name) == "country":
+					current_lab.country = unicode(j.value)
+				if unicode(j.name) == "state":
+					current_lab.state = unicode(j.value)
+				if unicode(j.name) == "city":
+					current_lab.city = unicode(j.value)
+				if unicode(j.name) == "founding":
+					current_lab.city = unicode(j.value)
+				if unicode(j.name) == "coordinate":
+					value = unicode(j.value)
+					current_lab.coordinates = value
+					latlong = []
+					if ", " in value:
+						latlong = value.rstrip(", ").split(", ")
+					elif " , " in value:
+						latlong = value.rstrip(" , ").split(" , ")
+					else:
+						latlong = ["",""]
+					current_lab.lat = latlong[0]
+					current_lab.long = latlong[1]
+				if unicode(j.name) == "membercount":
+					current_lab.membercount = unicode(j.value)
+				if unicode(j.name) == "fee":
+					current_lab.fee = unicode(j.value)
+				if unicode(j.name) == "size":
+					current_lab.size = unicode(j.value)
+				if unicode(j.name) == "status":
+					current_lab.status = unicode(j.value)
+				if unicode(j.name) == "site":
+					current_lab.site = unicode(j.value)
+				if unicode(j.name) == "wiki":
+					current_lab.wiki = unicode(j.value)
+				if unicode(j.name) == "irc":
+					current_lab.irc = unicode(j.value)
+				if unicode(j.name) == "jabber":
+					current_lab.jabber = unicode(j.value)
+				if unicode(j.name) == "phone":
+					current_lab.phone = unicode(j.value)
+				if unicode(j.name) == "youtube":
+					current_lab.youtube = unicode(j.value)
+				if unicode(j.name) == "eventbrite":
+					current_lab.eventbrite = unicode(j.value)
+				if unicode(j.name) == "facebook":
+					current_lab.facebook = unicode(j.value)
+				if unicode(j.name) == "ustream":
+					current_lab.ustream = unicode(j.value)
+				if unicode(j.name) == "flickr":
+					current_lab.flickr = unicode(j.value)
+				if unicode(j.name) == "twitter":
+					current_lab.twitter = unicode(j.value)
+				if unicode(j.name) == "googleplus":
+					current_lab.googleplus = unicode(j.value)
+				if unicode(j.name) == "email":
+					current_lab.email = unicode(j.value)
+				if unicode(j.name) == "maillist":
+					current_lab.maillist = unicode(j.value)
+				if unicode(j.name) == "ical":
+					current_lab.ical = unicode(j.value)
+				if unicode(j.name) == "forum":
+					current_lab.forum = unicode(j.value)
+				if unicode(j.name) == "street-address":
+					current_lab.street_address = unicode(j.value)
+				if unicode(j.name) == "postalcode":
+					current_lab.postalcode = unicode(j.value)
+				if unicode(j.name) == "region":
+					current_lab.region = unicode(j.value)
+				if unicode(j.name) == "post-office-box":
+					current_lab.post_office_box = unicode(j.value)
 		elif "Equipment" in element_name:
 			value = k.params[0].replace("equipment=", "")
 			equipment_list.append(value)
@@ -89,62 +158,8 @@ def get_single_lab(lab_slug, data_format):
 			test_value = k.name
 		except AttributeError:
 			freetext += unicode(k)
-	print freetext
 	current_lab.text = freetext
-	exit()
 	
-	
-	
-	result = []
-	
-	# Add existing data
-	for i in result:
-		if "coordinates=" in i:
-			value = i.replace("coordinates=", "")
-			current_lab.coordinates = value
-			latlong = []
-			if ", " in value:
-				latlong = value.rstrip(", ").split(", ")
-			elif " , " in value:
-				latlong = value.rstrip(" , ").split(" , ")
-			else:
-				latlong = ["",""]
-			current_lab.lat = latlong[0]
-			current_lab.long = latlong[1]
-		elif "province=" in i:
-			value = i.replace("province=", "")
-			current_lab.province = value.upper()
-		elif "region=" in i:
-			value = i.replace("region=", "")
-			current_lab.region = value
-		elif "address=" in i:
-			value = i.replace("address=", "")
-			current_lab.address = value
-		elif "city=" in i:
-			value = i.replace("city=", "")
-			current_lab.city = value
-		elif "fablabsio=" in i:
-			value = i.replace("fablabsio=", "")
-			current_lab.fablabsio = value
-		elif "website=" in i:
-			value = i.replace("website=", "")
-			current_lab.website = value
-		elif "facebook=" in i:
-			value = i.replace("facebook=", "")
-			current_lab.facebook = value
-		elif "twitter=" in i:
-			value = i.replace("twitter=", "")
-			current_lab.twitter = value
-		elif "email=" in i:
-			value = i.replace("email=", "")
-			current_lab.email = value
-		elif "manager=" in i:
-			value = i.replace("manager=", "")
-			current_lab.manager = value
-		elif "birthyear=" in i:
-			value = i.replace("birthyear=", "")
-			current_lab.birthyear = value
-
 	if data_format == "dict":
 		return current_lab.__dict__
 	elif data_format == "object":
@@ -155,7 +170,7 @@ def get_labs(data_format):
 	"""Gets data from all labs from makeinitaly.foundation."""
 
 	wiki = MediaWiki(hackerspaces_org_api_url)
-	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '500'})
+	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '5000'})
 	urls = []
 	for i in wiki_response["query"]["categorymembers"]:
 		urls.append(i["title"].replace(" ", "_"))
@@ -164,6 +179,7 @@ def get_labs(data_format):
 	# Load all the Labs
 	for i in urls:
 		current_lab = get_single_lab(i,data_format)
+		print current_lab
 		labs[i] = current_lab		
 	
 	return labs
@@ -182,7 +198,7 @@ if __name__ == "__main__":
 	#a = data_from_makeinitaly_foundation()
 	#print a["query"]["categorymembers"]
 	b = get_labs(data_format="dict")
-	#print b
+	print b
 	#print get_labs(data_format="dict")
 	#a = get_fablabs()
 	#print a["ouagalab"].name
