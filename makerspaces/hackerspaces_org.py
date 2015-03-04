@@ -10,6 +10,7 @@
 
 from simplemediawiki import MediaWiki
 #Requirement: kitchen
+import mwparserfromhell
 
 makeinitaly__foundation_api_url = "http://hackerspaces.org/w/api.php"
 
@@ -18,22 +19,38 @@ class Lab(object):
 	"""Represents a Lab as it is described on hackerspaces.org."""
 	
 	def __init__(self):
-		self.long = ""
-		self.lat = ""
-		self.coordinates = ""
-		self.province = ""
-		self.region = ""
-		self.address = ""
-		self.city = ""
-		self.fablabsio = ""
-		self.website = ""
-		self.facebook = ""
-		self.twitter = ""
-		self.email = ""
-		self.manager = ""
-		self.birthyear = ""
-		self.text_it = ""
-		self.text_en = ""
+		self.logo=""
+		self.country=""
+		self.state=""
+		self.city=""
+		self.founding=""
+		self.coordinate=""
+		self.membercount=""
+		self.fee=""
+		self.size=""
+		self.status=""
+		self.site=""
+		self.wiki=""
+		self.irc=""
+		self.jabber=""
+		self.phone=""
+		self.youtube=""
+		self.eventbrite=""
+		self.facebook=""
+		self.ustream=""
+		self.flickr=""
+		self.twitter=""
+		self.googleplus=""
+		self.email=""
+		self.maillist=""
+		self.ical=""
+		self.forum=""
+		self.street_address=""
+		self.postalcode=""
+		self.region=""
+		self.post_office_box=""
+		self.text=""
+		self.equipment=[]
 		
 
 def get_single_lab(lab_slug, data_format):
@@ -44,8 +61,19 @@ def get_single_lab(lab_slug, data_format):
 	# If we don't know the pageid...
 	for i in wiki_response["query"]["pages"]:
 		content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
-
-	print content
+		
+	# Parse the Mediawiki code	
+	wikicode = mwparserfromhell.parse(content)
+	for k in wikicode.filter_templates():
+		element_name = str(k.name)
+		if "Hackerspace" in element_name:
+			for j in k.params:
+				print unicode(j.name), unicode(j.value)
+			#for j in k.params:
+			#	print str(j)
+		elif "Equipment" in element_name:
+			value = k.params[0].replace("equipment=", "")
+	
 	exit()
 	# Clean the resulting string/list
 	#newstr01 = content.replace("}}", "")
