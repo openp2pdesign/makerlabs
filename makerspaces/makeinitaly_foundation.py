@@ -32,6 +32,31 @@ class Lab(object):
 		self.email = ""
 		self.manager = ""
 		self.birthyear = ""
+		self.text_it = ""
+		self.text_en = ""
+
+
+def get_lab_text(lab_slug, language):
+	"""Gets text description in English or Italian from a single lab from makeinitaly.foundation."""
+	if language == "English" or language == "english" or language == "EN" or language == "En":
+		language = "en"
+	elif language == "Italian" or language == "italian" or language == "IT" or language == "It" or language == "it":
+		language = "it"
+	else:
+		language = "en" 
+	wiki = MediaWiki(makeinitaly__foundation_api_url)
+	wiki_response = wiki.call({'action': 'query', 'titles':lab_slug+"/"+language, 'prop': 'revisions', 'rvprop': 'content'})
+	
+	# If we don't know the pageid...
+	for i in wiki_response["query"]["pages"]:
+		content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
+	
+	# Clean the resulting string/list
+	newstr01 = content.replace("}}", "")
+	newstr02 = newstr01.replace("{{", "")
+	result = newstr02.rstrip("\n|").split("\n|")
+	
+	return result[0]
 		
 
 def get_single_lab(lab_slug, data_format):
@@ -51,20 +76,6 @@ def get_single_lab(lab_slug, data_format):
 	
 	# Transform the data into a Lab object
 	current_lab = Lab()
-	current_lab.coordinates = ""
-	current_lab.long = ""
-	current_lab.lat = ""
-	current_lab.province = ""
-	current_lab.region = ""
-	current_lab.address = ""
-	current_lab.city = ""
-	current_lab.fablabsio = ""
-	current_lab.website = ""
-	current_lab.facebook = ""
-	current_lab.twitter = ""
-	current_lab.email = ""
-	current_lab.manager = ""
-	current_lab.birthyear = ""
 	
 	# Add existing data
 	for i in result:
@@ -113,11 +124,14 @@ def get_single_lab(lab_slug, data_format):
 		elif "birthyear=" in i:
 			value = i.replace("birthyear=", "")
 			current_lab.birthyear = value
+		
+	current_lab.text_en = get_lab_text(lab_slug=lab_slug, language="en")
+	current_lab.text_it = get_lab_text(lab_slug=lab_slug, language="it")
 
-		if data_format == "dict":
-			return current_lab.__dict__
-		elif data_format == "object":
-			return current_lab
+	if data_format == "dict":
+		return current_lab.__dict__
+	elif data_format == "object":
+		return current_lab
 	
 	
 def get_labs(data_format):
@@ -150,9 +164,9 @@ if __name__ == "__main__":
 	# Debug
 	#a = data_from_makeinitaly_foundation()
 	#print a["query"]["categorymembers"]
-	#b = get_lab_dict("WeMake")
-	#print b
-	print get_labs(data_format="dict")
+	b = get_single_lab(lab_slug="WeMake",data_format="dict")
+	print b
+	#print get_labs(data_format="dict")
 	#a = get_fablabs()
 	#print a["ouagalab"].name
 	#print a["ouagalab"].city
