@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(
-  name = 'makerspaces',
+  name = 'PyMakerspaces',
   packages = ['makerspaces'],
   version = '0.1',
   description = 'Python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
