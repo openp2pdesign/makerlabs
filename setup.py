@@ -7,7 +7,7 @@ setup(
   author = 'Massimo Menichinelli',
   author_email = 'info@openp2pdesign.org',
   url = 'https://github.com/openp2pdesign/PyMakerspaces',
-  download_url = '',
+  download_url = 'https://github.com/openp2pdesign/PyMakerspaces/releases/tag/v0.1',
   keywords = ['FabLab', 'Makerspace', 'Hackerspace'],
   classifiers = ["Development Status :: 3 - Alpha",
         "Topic :: Utilities",
