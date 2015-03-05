@@ -56,7 +56,7 @@ class Lab(object):
 		
 
 def get_single_lab(lab_slug, data_format):
-	"""Gets data from a single lab from makeinitaly.foundation."""
+	"""Gets data from a single lab from hackerspaces.org."""
 	wiki = MediaWiki(hackerspaces_org_api_url)
 	wiki_response = wiki.call({'action': 'query', 'titles':lab_slug, 'prop': 'revisions', 'rvprop': 'content'})
 	
@@ -164,28 +164,56 @@ def get_single_lab(lab_slug, data_format):
 		return current_lab.__dict__
 	elif data_format == "object":
 		return current_lab
-	
-	
-def get_labs(data_format):
-	"""Gets data from all labs from makeinitaly.foundation."""
 
+
+def get_labs(data_format):
+	"""Gets data from all labs from hackerspaces.org."""
+	
+	labs = []
+	
+	# Get the first page of data
 	wiki = MediaWiki(hackerspaces_org_api_url)
-	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '5000'})
+	wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '500'})
+	nextpage = wiki_response["query-continue"]["categorymembers"]["cmcontinue"]
+	
 	urls = []
 	for i in wiki_response["query"]["categorymembers"]:
 		urls.append(i["title"].replace(" ", "_"))
 	
-	labs = {}
-	# Load all the Labs
+	# Load all the Labs in the first page
 	for i in urls:
 		current_lab = get_single_lab(i,data_format)
-		labs[i] = current_lab		
+		labs.append(current_lab)
 	
-	return labs
+	# Load all the Labs from the other pages
+	while "query-continue" in wiki_response:
+		wiki = MediaWiki(hackerspaces_org_api_url)
+		wiki_response = wiki.call({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Hackerspace','cmlimit': '500', "cmcontinue":nextpage})
+		
+		urls = []
+		for i in wiki_response["query"]["categorymembers"]:
+			urls.append(i["title"].replace(" ", "_"))
+		
+		# Load all the Labs
+		for i in urls:
+			current_lab = get_single_lab(i,data_format)
+			labs.append(current_lab)
+		
+		if "query-continue" in wiki_response:
+			nextpage = wiki_response["query-continue"]["categorymembers"]["cmcontinue"]
+		else:
+			break
+	
+	# Transform the list into a dictionary
+	labs_dict = {}
+	for j,k in enumerate(labs):
+		labs_dict[j] = k
+	
+	return labs_dict
 
 	
 def labs_count():
-	"""Gets the number of current Labs registered on makeinitaly.foundation."""
+	"""Gets the number of current Labs registered on hackerspaces.org."""
 	
 	labs = get_labs(data_format="dict")
 	
@@ -193,16 +221,4 @@ def labs_count():
 	
 
 if __name__ == "__main__":
-	# Debug
-	#a = data_from_makeinitaly_foundation()
-	#print a["query"]["categorymembers"]
-	b = get_labs(data_format="dict")
-	print b
-	#print get_labs(data_format="dict")
-	#a = get_fablabs()
-	#print a["ouagalab"].name
-	#print a["ouagalab"].city
-	#b = data_from_fablabs_io()
-	#c = fablabs_count()
-	#print c
-	#print get_fablabs_dict()
+	pass
