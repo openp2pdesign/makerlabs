@@ -41,6 +41,7 @@ class FabLab(object):
 		self.slug = ""
 		self.url = ""
 
+
 def data_from_fablabs_io():
 	"""Gets data from fablabs.io."""
 
@@ -85,6 +86,7 @@ def get_fablabs():
 	
 	return fablabs
 
+
 def get_fablabs_dict():
 	"""Gets the Fab Labs from fablabs.io as dictionaries instead of FabLab objects."""
 	fablab_data = get_fablabs()
@@ -95,6 +97,7 @@ def get_fablabs_dict():
 		fablabs[i] = fablab_data[i].__dict__
 		
 	return fablabs
+
 	
 def fablabs_count():
 	"""Gets the number of current Fab Labs registered on fablabs.io."""
@@ -105,11 +108,4 @@ def fablabs_count():
 
 
 if __name__ == "__main__":
-	# Debug
-	a = get_fablabs()
-	print a["ouagalab"].name
-	print a["ouagalab"].city
-	b = data_from_fablabs_io()
-	c = fablabs_count()
-	print c
-	#print get_fablabs_dict()
+	pass
