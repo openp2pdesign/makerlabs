@@ -2,7 +2,14 @@ from distutils.core import setup
 setup(
   name = 'PyMakerspaces',
   packages = ['makerspaces'],
-  version = '0.1',
+  install_requires=[
+  		"kitchen",
+        "requests",
+        "mwparserfromhell",
+        "simplemediawiki",
+        "wsgiref"
+    ],
+  version = '0.11',
   description = 'Python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
   author = 'Massimo Menichinelli',
   author_email = 'info@openp2pdesign.org',
