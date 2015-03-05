@@ -11,7 +11,11 @@ setup(
   keywords = ['FabLab', 'Makerspace', 'Hackerspace'],
   classifiers = ["Development Status :: 3 - Alpha",
         "Topic :: Utilities",
-        "Environment :: Console",
+        "Environment :: Web Environment",
+        "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",],
 )
