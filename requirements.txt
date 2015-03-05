@@ -1,0 +1,5 @@
+kitchen==1.2.1
+mwparserfromhell==0.3.3
+requests==2.5.3
+simplemediawiki==1.1.1
+wsgiref==0.1.2
