@@ -1,22 +1,19 @@
 from distutils.core import setup
 setup(
-  name = 'PyMakerspaces',
-  packages = ['makerspaces'],
-  install_requires=[
-  		"kitchen",
-        "requests",
-        "mwparserfromhell",
-        "simplemediawiki",
-        "wsgiref"
+    name='makerlabs',
+    packages=['makerlabs'],
+    install_requires=[
+        "kitchen", "requests", "mwparserfromhell", "simplemediawiki", "wsgiref"
     ],
-  version = '0.11',
-  description = 'Python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
-  author = 'Massimo Menichinelli',
-  author_email = 'info@openp2pdesign.org',
-  url = 'https://github.com/openp2pdesign/PyMakerspaces',
-  download_url = 'https://github.com/openp2pdesign/PyMakerspaces/releases/tag/v0.1',
-  keywords = ['FabLab', 'Makerspace', 'Hackerspace'],
-  classifiers = ["Development Status :: 3 - Alpha",
+    version='0.13',
+    description='Python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
+    author='Massimo Menichinelli',
+    author_email='info@openp2pdesign.org',
+    url='https://github.com/openp2pdesign/makerlabs',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.13',
+    keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop', 'Makers'],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
@@ -24,5 +21,5 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",],
-)
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    ], )
