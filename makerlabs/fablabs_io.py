@@ -10,6 +10,14 @@
 
 import requests
 
+from geojson import dumps, Feature, Point, FeatureCollection
+
+from geopy.geocoders import Nominatim
+
+
+# Geocoding variable
+geolocator = Nominatim()
+
 # Endpoints
 fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/v0/labs.json"
 fablabs_io_projects_api_url_v0 = "https://api.fablabs.io/v0/projects.json"
@@ -107,8 +115,25 @@ def get_labs(format):
         current_lab.header_image_src = i["header_image_src"]
         current_lab.id = i["id"]
         current_lab.kind_name = i["kind_name"]
-        current_lab.latitude = i["latitude"]
-        current_lab.longitude = i["longitude"]
+        # Some labs do not have coordinates
+        if i["latitude"] is None or i["longitude"] is None:
+            address = i["address_1"] + i["city"] + i["country_code"]
+            try:
+                location = geolocator.geocode(address)
+                current_lab.latitude = location.latitude
+                current_lab.longitude = location.longitude
+            except:
+                try:
+                    location = geolocator.geocode(i["city"])
+                    current_lab.latitude = location.latitude
+                    current_lab.longitude = location.longitude
+                except:
+                    # For labs without a city, add 0,0 as coordinates
+                    current_lab.latitude = 0.0
+                    current_lab.longitude = 0.0
+        else:
+            current_lab.latitude = i["latitude"]
+            current_lab.longitude = i["longitude"]
         current_lab.links = i["links"]
         current_lab.name = i["name"]
         current_lab.parent_id = i["parent_id"]
@@ -116,16 +141,29 @@ def get_labs(format):
         current_lab.postal_code = i["postal_code"]
         current_lab.slug = i["slug"]
         current_lab.url = i["url"]
+        # Add the lab
         fablabs[i["slug"]] = current_lab
 
+    # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
         for j in fablabs:
             output[j] = fablabs[j].__dict__
+    # Returna a geojson
     elif format.lower() == "geojson" or format.lower() == "geo":
-        pass
+        labs_list = []
+        for l in fablabs:
+            single = fablabs[l].__dict__
+            single_lab = Feature(
+                type="Fab Lab",
+                geometry=Point((single["latitude"], single["longitude"])),
+                properties=single)
+            labs_list.append(single_lab)
+        output = dumps(FeatureCollection(labs_list))
+    # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = fablabs
+    # Default: return an oject
     else:
         output = fablabs
 
@@ -177,7 +215,10 @@ def get_projects(format):
         current_project.community = i["community"]
         current_project.lookingfor = i["lookingfor"]
         current_project.cover = i["cover"]
-        projects[project_url + str(current_project.id)] = current_project
+        url = project_url + str(current_project.id)
+        current_project.url = url
+        # Add the project
+        projects[current_project.id] = current_project
 
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
