@@ -3,15 +3,17 @@ setup(
     name='makerlabs',
     packages=['makerlabs'],
     install_requires=[
-        "kitchen", "requests", "mwparserfromhell", "simplemediawiki", "wsgiref"
+        "kitchen", "requests", "mwparserfromhell", "simplemediawiki",
+        "wsgiref", "geojson", "geopy"
     ],
-    version='0.13',
-    description='Python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
+    version='0.14',
+    description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.13',
-    keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop', 'Makers'],
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.14',
+    keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop',
+              'Makers'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
