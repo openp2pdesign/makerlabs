@@ -10,6 +10,7 @@ Thumbs.db
 # Tests
 tests/
 test/
+test*.*
 
 # Files that might appear on external disks
 .Spotlight-V100
