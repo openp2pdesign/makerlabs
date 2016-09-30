@@ -14,7 +14,6 @@ from geojson import dumps, Feature, Point, FeatureCollection
 
 from geopy.geocoders import Nominatim
 
-
 # Geocoding variable
 geolocator = Nominatim()
 
@@ -64,6 +63,7 @@ class Project(object):
         self.dropbox = ""
         self.bitbucket = ""
         self.lab_id = ""
+        self.lab = ""
         self.owner_id = ""
         self.created_at = ""
         self.updated_at = ""
@@ -149,7 +149,7 @@ def get_labs(format):
         output = {}
         for j in fablabs:
             output[j] = fablabs[j].__dict__
-    # Returna a geojson
+    # Return a geojson
     elif format.lower() == "geojson" or format.lower() == "geo":
         labs_list = []
         for l in fablabs:
@@ -184,6 +184,7 @@ def get_projects(format):
     projects_json = data_from_fablabs_io(fablabs_io_projects_api_url_v0)
     projects = {}
     project_url = "https://www.fablabs.io/projects/"
+    fablabs = get_labs(format="object")
 
     # Load all the FabLabs
     for i in projects_json["projects"]:
@@ -197,6 +198,13 @@ def get_projects(format):
         current_project.dropbox = i["dropbox"]
         current_project.bitbucket = i["bitbucket"]
         current_project.lab_id = i["lab_id"]
+        # Add the lab of the project
+        if i["lab_id"] is not None:
+            for k in fablabs:
+                if fablabs[k].id == i["lab_id"]:
+                    current_project.lab = fablabs[k]
+        else:
+            current_project.lab = None
         current_project.owner_id = i["owner_id"]
         current_project.created_at = i["created_at"]
         current_project.updated_at = i["updated_at"]
@@ -220,14 +228,37 @@ def get_projects(format):
         # Add the project
         projects[current_project.id] = current_project
 
+    # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
         for j in projects:
-            output[j] = projects[j].__dict__
+            project_dict = projects[j].__dict__
+            # Convert the lab from a Fab Lab object to a dict
+            if project_dict["lab"] is not None:
+                project_dict["lab"] = project_dict["lab"].__dict__
+            output[j] = project_dict
+    # Return a geojson, only for projects linked to a lab
     elif format.lower() == "geojson" or format.lower() == "geo":
-        pass
+        projects_list = []
+        for p in projects:
+            if projects[p].lab_id is not None:
+                single_project = projects[p].__dict__
+                if projects[p].lab is not None:
+                    single_project["lab"] = single_project["lab"].__dict__
+                for l in fablabs:
+                    single_lab = fablabs[l].__dict__
+                    if single_lab["id"] == single_project["lab_id"]:
+                        project_lab = Feature(
+                            type="Project in a Fab Lab",
+                            geometry=Point((single_lab["latitude"],
+                                            single_lab["longitude"])),
+                            properties=single_project)
+                        projects_list.append(project_lab)
+                output = dumps(FeatureCollection(projects_list))
+    # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = projects
+    # Default: return an object
     else:
         output = projects
 
