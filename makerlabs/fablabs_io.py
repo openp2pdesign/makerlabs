@@ -10,11 +10,12 @@
 
 import requests
 
-fablabs_io_api_url = "https://api.fablabs.io/v0/labs.json"
+# Endpoints
+fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/v0/labs.json"
+fablabs_io_projects_api_url_v0 = "https://api.fablabs.io/v0/projects.json"
 
 
 class FabLab(object):
-
     """Represents a Fab Lab as it is described on fablabs.io."""
 
     def __init__(self):
@@ -43,21 +44,21 @@ class FabLab(object):
         self.url = ""
 
 
-def data_from_fablabs_io():
+def data_from_fablabs_io(endpoint):
     """Gets data from fablabs.io."""
 
-    fablab_list = requests.get(fablabs_io_api_url).json()
+    data = requests.get(endpoint).json()
 
-    return fablab_list
+    return data
 
 
-def get_fablabs():
+def get_labs(format):
     """Gets FabLab data from fablabs.io."""
 
-    fablabs_json = data_from_fablabs_io()
+    fablabs_json = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
     fablabs = {}
 
-    # Load all the FabLabs
+    # Load all the FabLabs
     for i in fablabs_json["labs"]:
         current_lab = FabLab()
         current_lab.address_1 = i["address_1"]
@@ -85,25 +86,22 @@ def get_fablabs():
         current_lab.url = i["url"]
         fablabs[i["slug"]] = current_lab
 
-    return fablabs
+    if format.lower() == "dict" or format.lower() == "json":
+        output = {}
+        for j in fablabs:
+            output[j] = fablabs[j].__dict__
+    elif format.lower() == "object" or format.lower() == "obj":
+        output = fablabs
+    else:
+        output = fablabs
+
+    return output
 
 
-def get_fablabs_dict():
-    """Gets the Fab Labs from fablabs.io as dictionaries instead of FabLab objects."""
-    fablab_data = get_fablabs()
-    fablabs = {}
-
-    # Load all the FabLabs
-    for i in fablab_data:
-        fablabs[i] = fablab_data[i].__dict__
-
-    return fablabs
-
-
-def fablabs_count():
+def labs_count():
     """Gets the number of current Fab Labs registered on fablabs.io."""
 
-    fablabs = data_from_fablabs_io()
+    fablabs = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
 
     return len(fablabs["labs"])
 
