@@ -7,6 +7,10 @@ Desktop.ini
 ._*
 Thumbs.db
 
+# Tests
+tests/
+test/
+
 # Files that might appear on external disks
 .Spotlight-V100
 .Trashes
