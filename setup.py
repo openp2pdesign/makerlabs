@@ -3,8 +3,13 @@ setup(
     name='makerlabs',
     packages=['makerlabs'],
     install_requires=[
-        "kitchen", "requests", "mwparserfromhell", "simplemediawiki",
-        "wsgiref", "geojson", "geopy"
+        "kitchen",
+        "requests",
+        "mwparserfromhell",
+        "simplemediawiki",
+        "wsgiref",
+        "geojson",
+        "geopy"
     ],
     version='0.14',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',

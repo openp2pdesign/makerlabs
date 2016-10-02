@@ -49,6 +49,7 @@ class FabLab(object):
         self.postal_code = ""
         self.slug = ""
         self.url = ""
+        self.lab_type = "Fab Lab"
 
 
 class Project(object):
@@ -82,6 +83,7 @@ class Project(object):
         self.community = ""
         self.lookingfor = ""
         self.cover = ""
+        self.type = "Project in a Fab Lab"
 
 
 def data_from_fablabs_io(endpoint):
@@ -155,7 +157,7 @@ def get_labs(format):
         for l in fablabs:
             single = fablabs[l].__dict__
             single_lab = Feature(
-                type="Fab Lab",
+                type="Feature",
                 geometry=Point((single["latitude"], single["longitude"])),
                 properties=single)
             labs_list.append(single_lab)
@@ -249,7 +251,7 @@ def get_projects(format):
                     single_lab = fablabs[l].__dict__
                     if single_lab["id"] == single_project["lab_id"]:
                         project_lab = Feature(
-                            type="Project in a Fab Lab",
+                            type="Feature",
                             geometry=Point((single_lab["latitude"],
                                             single_lab["longitude"])),
                             properties=single_project)
