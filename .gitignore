@@ -1,4 +1,8 @@
-# MAC
+# DATA
+*.json
+*.geojson
+
+# OSX
 # Folder view configuration files
 .DS_Store
 Desktop.ini
