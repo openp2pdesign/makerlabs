@@ -64,16 +64,16 @@ def get_single_lab(lab_slug, data_format):
          'prop': 'revisions',
          'rvprop': 'content'})
 
-    # If we don't know the pageid...
+    # If we don't know the pageid...
     for i in wiki_response["query"]["pages"]:
         content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
 
-    # Transform the data into a Lab object
+    # Transform the data into a Lab object
     current_lab = Lab()
 
     equipment_list = []
 
-    # Parse the Mediawiki code
+    # Parse the Mediawiki code
     wikicode = mwparserfromhell.parse(content)
     for k in wikicode.filter_templates():
         element_name = unicode(k.name)
@@ -155,7 +155,7 @@ def get_single_lab(lab_slug, data_format):
 
     current_lab.equipment = equipment_list
 
-    # Load the free text
+    # Load the free text
     freetext = ""
     for k in wikicode._nodes:
         try:
@@ -175,7 +175,7 @@ def get_labs(data_format):
 
     labs = []
 
-    # Get the first page of data
+    # Get the first page of data
     wiki = MediaWiki(hackerspaces_org_api_url)
     wiki_response = wiki.call(
         {'action': 'query',
@@ -188,12 +188,12 @@ def get_labs(data_format):
     for i in wiki_response["query"]["categorymembers"]:
         urls.append(i["title"].replace(" ", "_"))
 
-    # Load all the Labs in the first page
+    # Load all the Labs in the first page
     for i in urls:
         current_lab = get_single_lab(i, data_format)
         labs.append(current_lab)
 
-    # Load all the Labs from the other pages
+    # Load all the Labs from the other pages
     while "query-continue" in wiki_response:
         wiki = MediaWiki(hackerspaces_org_api_url)
         wiki_response = wiki.call({'action': 'query',
@@ -206,7 +206,7 @@ def get_labs(data_format):
         for i in wiki_response["query"]["categorymembers"]:
             urls.append(i["title"].replace(" ", "_"))
 
-        # Load all the Labs
+        # Load all the Labs
         for i in urls:
             current_lab = get_single_lab(i, data_format)
             labs.append(current_lab)
@@ -217,7 +217,7 @@ def get_labs(data_format):
         else:
             break
 
-    # Transform the list into a dictionary
+    # Transform the list into a dictionary
     labs_dict = {}
     for j, k in enumerate(labs):
         labs_dict[j] = k

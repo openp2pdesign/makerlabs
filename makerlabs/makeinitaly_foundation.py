@@ -76,20 +76,20 @@ def get_single_lab(lab_slug, data_format):
          'prop': 'revisions',
          'rvprop': 'content'})
 
-    # If we don't know the pageid...
+    # If we don't know the pageid...
     for i in wiki_response["query"]["pages"]:
         content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
 
-    # Clean the resulting string/list
+    # Clean the resulting string/list
     newstr01 = content.replace("}}", "")
     newstr02 = newstr01.replace("{{", "")
     result = newstr02.rstrip("\n|").split("\n|")
     # result.remove(u'FabLab')
 
-    # Transform the data into a Lab object
+    # Transform the data into a Lab object
     current_lab = Lab()
 
-    # Add existing data
+    # Add existing data
     for i in result:
         if "coordinates=" in i:
             value = i.replace("coordinates=", "")
@@ -147,11 +147,11 @@ def get_single_lab(lab_slug, data_format):
 
 
 def get_labs(data_format):
-    """Gets data from all labs from hackerspaces.org."""
+    """Gets data from all labs from makeinitaly.foundation."""
 
     labs = []
 
-    # Get the first page of data
+    # Get the first page of data
     wiki = MediaWiki(makeinitaly__foundation_api_url)
     wiki_response = wiki.call(
         {'action': 'query',
@@ -166,12 +166,12 @@ def get_labs(data_format):
     for i in wiki_response["query"]["categorymembers"]:
         urls.append(i["title"].replace(" ", "_"))
 
-    # Load all the Labs in the first page
+    # Load all the Labs in the first page
     for i in urls:
         current_lab = get_single_lab(i, data_format)
         labs.append(current_lab)
 
-    # Load all the Labs from the other pages
+    # Load all the Labs from the other pages
     while "query-continue" in wiki_response:
         wiki = MediaWiki(makeinitaly__foundation_api_url)
         wiki_response = wiki.call({'action': 'query',
@@ -184,7 +184,7 @@ def get_labs(data_format):
         for i in wiki_response["query"]["categorymembers"]:
             urls.append(i["title"].replace(" ", "_"))
 
-        # Load all the Labs
+        # Load all the Labs
         for i in urls:
             current_lab = get_single_lab(i, data_format)
             labs.append(current_lab)
@@ -195,7 +195,7 @@ def get_labs(data_format):
         else:
             break
 
-    # Transform the list into a dictionary
+    # Transform the list into a dictionary
     labs_dict = {}
     for j, k in enumerate(labs):
         labs_dict[j] = k
