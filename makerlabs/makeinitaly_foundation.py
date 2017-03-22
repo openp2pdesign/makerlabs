@@ -8,6 +8,7 @@
 #
 #
 
+
 from simplemediawiki import MediaWiki
 
 

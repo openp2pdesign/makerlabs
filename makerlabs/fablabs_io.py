@@ -8,11 +8,11 @@
 #
 #
 
+
 import requests
-
 from geojson import dumps, Feature, Point, FeatureCollection
-
 from geopy.geocoders import Nominatim
+
 
 # Geocoding variable
 geolocator = Nominatim()
