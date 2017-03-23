@@ -33,6 +33,7 @@ class DiyBioLab(object):
         self.url = ""
         self.latitude = ""
         self.longitude = ""
+        self.lab_type = "DIYBio Lab"
 
 
 def data_from_diybio_org():
