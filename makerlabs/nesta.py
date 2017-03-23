@@ -9,12 +9,9 @@
 #
 #
 
-
 import pandas as pd
-import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
-
 
 # Geocoding variable
 geolocator = Nominatim()
@@ -24,16 +21,25 @@ nesta_uk_url = "https://raw.githubusercontent.com/nesta-uk/UK-makerspaces/master
 
 
 class UKMakerspace(object):
-    """Represents a DIYBio Lab as it is described on diybio.org."""
+    """Represents a UK Makerspace from the NESTA research, in a simplified way."""
 
     def __init__(self):
-        self.continent = ""
+        self.continent = "Europe"
+        self.address_1 = ""
+        self.address_2 = ""
+        self.address_notes = ""
         self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.url = ""
+        self.country_code = "UK"
+        self.county = ""
+        self.email = ""
         self.latitude = ""
         self.longitude = ""
+        self.links = ""
+        self.name = ""
+        self.phone = ""
+        self.postal_code = ""
+        self.url = ""
+        self.lab_type = "UK Makerspace from the NESTA"
 
 
 def data_from_nesta():
@@ -47,99 +53,38 @@ def data_from_nesta():
 def get_labs(format):
     """Gets current UK Makerspaces data as listed by NESTA."""
 
-    diybiolabs_soup = data_from_diybio_org()
-    diybiolabs = {}
+    ukmakerspaces_data = data_from_nesta()
+    ukmakerspaces = {}
 
-    rows_list = []
-    continents_dict = {}
-    continents_order = 0
-    ranges_starting_points = []
+    # Iterate over csv rows
+    for index, row in ukmakerspaces_data.iterrows():
+        current_lab = UKMakerspace()
+        current_lab.address_1 = row["Address"].replace("\r", " ")
+        current_lab.address_2 = row["Region"].replace("\r", " ") + " - " + row["Area"].replace("\r", " ")
+        current_lab.city = ""
+        current_lab.county = ""
+        current_lab.email = row["Email address"]
+        current_lab.latitude = ""
+        current_lab.longitude = ""
+        current_lab.links = ""
+        current_lab.name = row["Name of makerspace"]
+        current_lab.phone = row["Phone number"]
+        current_lab.postal_code = row["Postcode"]
+        current_lab.url = row["Website / URL"]
 
-    # Load all the DIYBio Labs
-    # By first parsing the html
-
-    # Parse table rows
-    for row in diybiolabs_soup.select("table tr"):
-        cells = row.find_all('td')
-        rows_list.append(cells)
-
-    # Find the continents in order to iterate over their children td
-    for k, row in enumerate(rows_list):
-        for col in row:
-            if col.find('h3'):
-                for h3 in col.findAll('h3'):
-                    ranges_starting_points.append(k)
-                    continents_dict[continents_order] = h3.get_text()
-                    continents_order += 1
-
-    # Find the rows of each continent
-    ranges = {}
-    for k, j in enumerate(reversed(ranges_starting_points)):
-        if k < len(ranges_starting_points) - 1:
-            ranges[k] = {"start": ranges_starting_points[k],
-                         "end": ranges_starting_points[k + 1]}
-        else:
-            # The last continent, Oceania
-            ranges[k] = {"start": ranges_starting_points[k],
-                         "end": len(rows_list)}
-
-    # Iterate over the range of each continent to find the Labs
-    for i in ranges:
-        # The +1 just avoids the H3 line
-        for j in range(ranges[i]["start"] + 1, ranges[i]["end"]):
-            # Avoid empty rows by measuring the lenght of the content of each cell and with a boolean check
-            rules = [len(n) == 0 for n in rows_list[j]]
-            if False in rules:
-                current_lab = DiyBioLab()
-                current_lab.continent = continents_dict[i]
-                for cell in rows_list[j]:
-                    # Avoid empty cells
-                    if len(cell.contents) > 0:
-                        # If it is a cell with a link
-                        try:
-                            current_lab.url = cell.contents[0].attrs['href']
-                        # Otherwise the cell has the city name or country code
-                        except:
-                            if len(cell.contents[0]) < 3:
-                                current_lab.country_code = cell.contents[0]
-                            else:
-                                current_lab.city = cell.contents[0]
-                                # Labs do not have coordinates
-                                # so let's get them from the city name
-                                # sand get the full country name from the code
-                                try:
-                                    location = geolocator.geocode(
-                                        current_lab.city)
-                                    current_lab.latitude = location.latitude
-                                    current_lab.longitude = location.longitude
-                                    country = geolocator.reverse(
-                                        [location.latitude, location.longitude
-                                         ])
-                                    current_lab.country = country.raw[
-                                        'address']['country']
-                                except:
-                                    # For labs without a city
-                                    # add 0,0 as coordinates
-                                    current_lab.latitude = 0.0
-                                    current_lab.longitude = 0.0
-
-                # Add the lab, with a slug from the url
-                if "http://www." in current_lab.url:
-                    slug = current_lab.url.replace("http://www.", "")
-                elif "https://www." in current_lab.url:
-                    slug = current_lab.url.replace("https://www.", "")
-                diybiolabs[slug] = current_lab
+        # Add the lab, with a slug from the name
+        ukmakerspaces[current_lab.name] = current_lab
 
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
-        for j in diybiolabs:
-            output[j] = diybiolabs[j].__dict__
+        for j in ukmakerspaces:
+            output[j] = ukmakerspaces[j].__dict__
     # Return a geojson
     elif format.lower() == "geojson" or format.lower() == "geo":
         labs_list = []
-        for l in diybiolabs:
-            single = diybiolabs[l].__dict__
+        for l in ukmakerspaces:
+            single = ukmakerspaces[l].__dict__
             single_lab = Feature(
                 type="Feature",
                 geometry=Point((single["latitude"], single["longitude"])),
@@ -148,10 +93,10 @@ def get_labs(format):
         output = dumps(FeatureCollection(labs_list))
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
-        output = diybiolabs
+        output = ukmakerspaces
     # Default: return an oject
     else:
-        output = diybiolabs
+        output = ukmakerspaces
 
     return output
 
