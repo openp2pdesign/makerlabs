@@ -8,52 +8,52 @@
 #
 #
 
-
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
-
+import json
 
 # Geocoding variable
 geolocator = Nominatim()
 
-# API key
-# Register your app for the API key here:
-# https://dev.hackaday.io/applications
-API_key = "..."
 
 # Endpoints
+# The documented endpoint does not have coordinates,
+# the undocumented one has them, so for the moment we use the latter.
+# The undocumented endpoint does not need API keys or OAuth.
+# hackaday.io API documentation:
+# https://dev.hackaday.io/doc/api/get-pages
+# Register your app for the API key here:
+# https://dev.hackaday.io/applications
+client_id = "..."
+client_secret = "..."
+API_key = "..."
+# Documented endpoint for the list of hackerspaces
 hackaday_io_labs_api_url = "https://api.hackaday.io/v1/pages/hackerspaces?api_key=" + API_key
+# Undocumented endpoint for the map of hackerspaces
+hackaday_io_labs_map_url = "http://hackaday.io/api/hackerspaceslocations"
 
 
 class Hackerspace(object):
     """Represents a Hackerspace as it is described on hackaday.io."""
 
     def __init__(self):
-        self.address_1 = ""
-        self.address_2 = ""
-        self.address_notes = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.capabilities = ""
-        self.city = ""
-        self.country_code = ""
-        self.county = ""
-        self.description = ""
-        self.email = ""
-        self.header_image_src = ""
         self.id = ""
-        self.kind_name = ""
+        self.name = ""
+        self.description = ""
+        self.location = ""
+        self.created_at = ""
+        self.url = "https://hackaday.io/hackerspace/" + self.id
         self.latitude = ""
         self.longitude = ""
-        self.links = ""
-        self.name = ""
-        self.parent_id = ""
-        self.phone = ""
+        self.address = ""
+        self.address_1 = ""
+        self.city = ""
+        self.country = ""
+        self.country_code = ""
+        self.county = ""
         self.postal_code = ""
-        self.slug = ""
-        self.url = ""
-        self.lab_type = "Fab Lab"
+        self.lab_type = "Hackerspace"
 
 
 def data_from_hackaday_io(endpoint):
@@ -67,65 +67,59 @@ def data_from_hackaday_io(endpoint):
 def get_labs(format):
     """Gets Hackerspaces data from hackaday.io."""
 
-    hackerspaces_json = data_from_hackaday_io(hackaday_io_labs_api_url)
+    hackerspaces_json = data_from_hackaday_io(hackaday_io_labs_map_url)
     hackerspaces = {}
 
     # Load all the Hackerspaces
-    for i in fablabs_json["labs"]:
-        current_lab = FabLab()
-        current_lab.address_1 = i["address_1"]
-        current_lab.address_2 = i["address_2"]
-        current_lab.address_notes = i["address_notes"]
-        current_lab.avatar = i["avatar"]
-        current_lab.blurb = i["blurb"]
-        current_lab.capabilities = i["capabilities"]
-        current_lab.city = i["city"]
-        current_lab.country_code = i["country_code"]
-        current_lab.county = i["county"]
-        current_lab.description = i["description"]
-        current_lab.email = i["email"]
-        current_lab.header_image_src = i["header_image_src"]
+    for i in hackerspaces_json:
+        current_lab = Hackerspace()
         current_lab.id = i["id"]
-        current_lab.kind_name = i["kind_name"]
-        # Some labs do not have coordinates
-        if i["latitude"] is None or i["longitude"] is None:
-            address = i["address_1"] + i["city"] + i["country_code"]
-            try:
-                location = geolocator.geocode(address)
-                current_lab.latitude = location.latitude
-                current_lab.longitude = location.longitude
-            except:
-                try:
-                    location = geolocator.geocode(i["city"])
-                    current_lab.latitude = location.latitude
-                    current_lab.longitude = location.longitude
-                except:
-                    # For labs without a city, add 0,0 as coordinates
-                    current_lab.latitude = 0.0
-                    current_lab.longitude = 0.0
-        else:
-            current_lab.latitude = i["latitude"]
-            current_lab.longitude = i["longitude"]
-        current_lab.links = i["links"]
         current_lab.name = i["name"]
-        current_lab.parent_id = i["parent_id"]
-        current_lab.phone = i["phone"]
-        current_lab.postal_code = i["postal_code"]
-        current_lab.slug = i["slug"]
-        current_lab.url = i["url"]
+        if len(i["description"]) != 0:
+            current_lab.description = i["description"]
+        elif len(i["summary"]) != 0:
+            current_lab.description = i["summary"]
+        current_lab.created_at = i["moments"]["exact"]
+
+        # Check if there are coordinates
+        if i["latlon"] is not None:
+            latlon = json.loads(i["latlon"])
+            current_lab.latitude = latlon["lat"]
+            current_lab.longitude = latlon["lng"]
+            # Get country, county and city from them
+            country = geolocator.reverse(
+                [latlon["lat"], latlon["lng"]])
+            current_lab.country = country.raw[
+                "address"]["country"]
+            current_lab.address = country.raw["display_name"]
+            current_lab.address_1 = country.raw["display_name"]
+            current_lab.country_code = country.raw[
+                "address"]["country_code"]
+            current_lab.county = country.raw[
+                "address"]["state_district"]
+            current_lab.city = country.raw[
+                "address"]["city"]
+            current_lab.postal_code = country.raw[
+                "address"]["postcode"]
+        else:
+            # For labs without a location or coordinates
+            # add 0,0 as coordinates
+            current_lab.latitude = 0.0
+            current_lab.longitude = 0.0
+
         # Add the lab
-        fablabs[i["slug"]] = current_lab
+        hackerspaces[i["name"]] = current_lab
 
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
-        for j in fablabs:
-            output[j] = fablabs[j].__dict__
+        for j in hackerspaces:
+            output[j] = hackerspaces[j].__dict__
     # Return a geojson
     elif format.lower() == "geojson" or format.lower() == "geo":
         labs_list = []
-        for l in fablabs:
-            single = fablabs[l].__dict__
+        for l in hackerspaces:
+            single = hackerspaces[l].__dict__
             single_lab = Feature(
                 type="Feature",
                 geometry=Point((single["latitude"], single["longitude"])),
@@ -134,10 +128,10 @@ def get_labs(format):
         output = dumps(FeatureCollection(labs_list))
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
-        output = fablabs
+        output = hackerspaces
     # Default: return an oject
     else:
-        output = fablabs
+        output = hackerspaces
 
     return output
 
