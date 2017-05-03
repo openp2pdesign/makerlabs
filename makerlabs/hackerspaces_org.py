@@ -26,8 +26,8 @@ class Lab(object):
         self.city = ""
         self.founding = ""
         self.coordinates = ""
-        self.lat = ""
-        self.long = ""
+        self.latitude = ""
+        self.longitude = ""
         self.membercount = ""
         self.fee = ""
         self.size = ""
@@ -56,7 +56,7 @@ class Lab(object):
         self.equipment = []
 
 
-def get_single_lab(lab_slug, data_format):
+def get_single_lab(lab_slug):
     """Gets data from a single lab from hackerspaces.org."""
     wiki = MediaWiki(hackerspaces_org_api_url)
     wiki_response = wiki.call(
@@ -100,8 +100,8 @@ def get_single_lab(lab_slug, data_format):
                         latlong = value.rstrip(" , ").split(" , ")
                     else:
                         latlong = ["", ""]
-                    current_lab.lat = latlong[0]
-                    current_lab.long = latlong[1]
+                    current_lab.latitude = latlong[0]
+                    current_lab.longitude = latlong[1]
                 if unicode(j.name) == "membercount":
                     current_lab.membercount = unicode(j.value)
                 if unicode(j.name) == "fee":
@@ -165,13 +165,10 @@ def get_single_lab(lab_slug, data_format):
             freetext += unicode(k)
     current_lab.text = freetext
 
-    if data_format == "dict":
-        return current_lab.__dict__
-    elif data_format == "object":
-        return current_lab
+    return current_lab
 
 
-def get_labs(data_format):
+def get_labs(format):
     """Gets data from all labs from hackerspaces.org."""
 
     labs = []
@@ -191,7 +188,7 @@ def get_labs(data_format):
 
     # Load all the Labs in the first page
     for i in urls:
-        current_lab = get_single_lab(i, data_format)
+        current_lab = get_single_lab(i)
         labs.append(current_lab)
 
     # Load all the Labs from the other pages
@@ -209,7 +206,7 @@ def get_labs(data_format):
 
         # Load all the Labs
         for i in urls:
-            current_lab = get_single_lab(i, data_format)
+            current_lab = get_single_lab(i)
             labs.append(current_lab)
 
         if "query-continue" in wiki_response:
@@ -221,15 +218,38 @@ def get_labs(data_format):
     # Transform the list into a dictionary
     labs_dict = {}
     for j, k in enumerate(labs):
-        labs_dict[j] = k
+        labs_dict[j] = k.__dict__
 
-    return labs_dict
+    # Return a dictiornary / json
+    if format.lower() == "dict" or format.lower() == "json":
+        output = labs_dict
+    # Return a geojson
+    elif format.lower() == "geojson" or format.lower() == "geo":
+        labs_list = []
+        for l in labs_dict:
+            single = labs_dict[l].__dict__
+            single_lab = Feature(
+                type="Feature",
+                geometry=Point((single["latitude"], single["longitude"])),
+                properties=single)
+            labs_list.append(single_lab)
+        output = dumps(FeatureCollection(labs_list))
+    # Return an object
+    elif format.lower() == "object" or format.lower() == "obj":
+        output = labs
+    # Default: return an object
+    else:
+        output = labs
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(labs_dict)
+    return output
 
 
 def labs_count():
     """Gets the number of current Labs registered on hackerspaces.org."""
 
-    labs = get_labs(data_format="dict")
+    labs = get_labs()
 
     return len(labs)
 
