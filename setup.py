@@ -13,12 +13,12 @@ setup(
         "beautifulsoup4",
         "lxml"
     ],
-    version='0.15',
+    version='0.16',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.15',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.16',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop',
               'Makers'],
     classifiers=[
