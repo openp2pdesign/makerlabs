@@ -103,10 +103,11 @@ def get_labs(format):
     # Load all the FabLabs
     for i in fablabs_json["labs"]:
         current_lab = FabLab()
+        print i
         current_lab.address_1 = i["address_1"]
         current_lab.address_2 = i["address_2"]
         current_lab.address_notes = i["address_notes"]
-        current_lab.avatar = i["avatar"]
+        current_lab.avatar = i["avatar_url"]
         current_lab.blurb = i["blurb"]
         current_lab.capabilities = i["capabilities"]
         current_lab.city = i["city"]
@@ -114,7 +115,7 @@ def get_labs(format):
         current_lab.county = i["county"]
         current_lab.description = i["description"]
         current_lab.email = i["email"]
-        current_lab.header_image_src = i["header_image_src"]
+        current_lab.header_image_src = i["header_url"]
         current_lab.id = i["id"]
         current_lab.kind_name = i["kind_name"]
         # Some labs do not have coordinates
@@ -276,4 +277,4 @@ def projects_count():
 
 
 if __name__ == "__main__":
-    pass
+    print get_labs(format="json")
