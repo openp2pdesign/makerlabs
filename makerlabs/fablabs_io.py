@@ -103,7 +103,6 @@ def get_labs(format):
     # Load all the FabLabs
     for i in fablabs_json["labs"]:
         current_lab = FabLab()
-        print i
         current_lab.address_1 = i["address_1"]
         current_lab.address_2 = i["address_2"]
         current_lab.address_notes = i["address_notes"]
