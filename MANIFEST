@@ -4,5 +4,8 @@ setup.py
 makerlabs/__init__.py
 makerlabs/diybio_org.py
 makerlabs/fablabs_io.py
+makerlabs/hackaday_io.py
 makerlabs/hackerspaces_org.py
 makerlabs/makeinitaly_foundation.py
+makerlabs/makery_info.py
+makerlabs/nesta.py

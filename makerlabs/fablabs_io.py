@@ -277,4 +277,4 @@ def projects_count():
 
 
 if __name__ == "__main__":
-    print get_labs(format="json")
+    pass
