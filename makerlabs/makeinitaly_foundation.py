@@ -21,8 +21,8 @@ class Lab(object):
     """Represents a Lab as it is described on makeinitaly.foundation."""
 
     def __init__(self):
-        self.long = ""
-        self.lat = ""
+        self.longitude = ""
+        self.latitude = ""
         self.coordinates = ""
         self.province = ""
         self.region = ""
@@ -69,7 +69,7 @@ def get_lab_text(lab_slug, language):
     return result[0]
 
 
-def get_single_lab(lab_slug, data_format):
+def get_single_lab(lab_slug):
     """Gets data from a single lab from makeinitaly.foundation."""
     wiki = MediaWiki(makeinitaly__foundation_api_url)
     wiki_response = wiki.call(
@@ -103,8 +103,8 @@ def get_single_lab(lab_slug, data_format):
                 latlong = value.rstrip(" , ").split(" , ")
             else:
                 latlong = ["", ""]
-            current_lab.lat = latlong[0]
-            current_lab.long = latlong[1]
+            current_lab.latitude = latlong[0]
+            current_lab.longitude = latlong[1]
         elif "province=" in i:
             value = i.replace("province=", "")
             current_lab.province = value.upper()
@@ -142,13 +142,10 @@ def get_single_lab(lab_slug, data_format):
     current_lab.text_en = get_lab_text(lab_slug=lab_slug, language="en")
     current_lab.text_it = get_lab_text(lab_slug=lab_slug, language="it")
 
-    if data_format == "dict":
-        return current_lab.__dict__
-    elif data_format == "object":
-        return current_lab
+    return current_lab
 
 
-def get_labs(data_format):
+def get_labs(format):
     """Gets data from all labs from makeinitaly.foundation."""
 
     labs = []
@@ -170,7 +167,7 @@ def get_labs(data_format):
 
     # Load all the Labs in the first page
     for i in urls:
-        current_lab = get_single_lab(i, data_format)
+        current_lab = get_single_lab(i)
         labs.append(current_lab)
 
     # Load all the Labs from the other pages
@@ -200,9 +197,32 @@ def get_labs(data_format):
     # Transform the list into a dictionary
     labs_dict = {}
     for j, k in enumerate(labs):
-        labs_dict[j] = k
+        labs_dict[j] = k.__dict__
 
-    return labs_dict
+    # Return a dictiornary / json
+    if format.lower() == "dict" or format.lower() == "json":
+        output = labs_dict
+    # Return a geojson
+    elif format.lower() == "geojson" or format.lower() == "geo":
+        labs_list = []
+        for l in labs_dict:
+            single = labs_dict[l].__dict__
+            single_lab = Feature(
+                type="Feature",
+                geometry=Point((single["latitude"], single["longitude"])),
+                properties=single)
+            labs_list.append(single_lab)
+        output = dumps(FeatureCollection(labs_list))
+    # Return an object
+    elif format.lower() == "object" or format.lower() == "obj":
+        output = labs
+    # Default: return an object
+    else:
+        output = labs
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(labs_dict)
+    return output
 
 
 def labs_count():
