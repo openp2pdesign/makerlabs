@@ -12,7 +12,6 @@ import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
-import json
 
 # Geocoding variable
 geolocator = Nominatim()
