@@ -8,6 +8,7 @@
 #
 #
 
+import json
 from simplemediawiki import MediaWiki
 import mwparserfromhell
 

@@ -9,6 +9,7 @@
 #
 
 
+import json
 from simplemediawiki import MediaWiki
 
 

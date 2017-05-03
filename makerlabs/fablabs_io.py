@@ -9,6 +9,7 @@
 #
 
 
+import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
@@ -168,7 +169,9 @@ def get_labs(format):
     # Default: return an oject
     else:
         output = fablabs
-
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(output)
     return output
 
 
@@ -263,7 +266,9 @@ def get_projects(format):
     # Default: return an object
     else:
         output = projects
-
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(output)
     return output
 
 
@@ -276,4 +281,4 @@ def projects_count():
 
 
 if __name__ == "__main__":
-    pass
+    print get_labs(format="json")

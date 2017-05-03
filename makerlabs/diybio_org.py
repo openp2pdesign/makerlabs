@@ -9,6 +9,7 @@
 #
 
 
+import json
 from bs4 import BeautifulSoup
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
@@ -156,7 +157,9 @@ def get_labs(format):
     # Default: return an oject
     else:
         output = diybiolabs
-
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(output)
     return output
 
 

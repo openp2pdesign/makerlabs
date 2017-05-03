@@ -9,6 +9,7 @@
 #
 
 
+import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
@@ -133,7 +134,9 @@ def get_labs(format):
     # Default: return an oject
     else:
         output = labs
-
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(output)
     return output
 
 
