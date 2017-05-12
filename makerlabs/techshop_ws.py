@@ -38,10 +38,10 @@ class Techshop(object):
         self.lab_type = "DIYBio Lab"
 
 
-def data_from_techshop_ws():
+def data_from_techshop_ws(tws_url):
     """Scrapes data from techshop.ws."""
 
-    r = requests.get(diy_bio_labs_url)
+    r = requests.get(tws_url)
     if r.status_code == 200:
         data = BeautifulSoup(r.text, "lxml")
     else:
@@ -53,7 +53,7 @@ def data_from_techshop_ws():
 def get_labs(format):
     """Gets Techshop data from techshop.ws."""
 
-    techshops_soup = data_from_techshop_ws()
+    techshops_soup = data_from_techshop_ws(techshop_us_url)
     techshops = {}
 
     rows_list = []
@@ -64,8 +64,24 @@ def get_labs(format):
     # Load all the TechShops
     # By first parsing the html
 
+    data = techshops_soup.findAll('div', attrs={'id': 'main-content'})
+    for element in data:
+        links = element.findAll('a')
+        hrefs = {}
+        for k, a in enumerate(links):
+            if "contact" not in a['href']:
+                hrefs[k] = a['href']
+        for k, v in hrefs.iteritems():
+            if "http://techshop.ws/" not in v:
+                hrefs[k] = "http://techshop.ws/"+v
+            else:
+                hrefs[k] = v
+        for k, v in hrefs.iteritems():
+            if "http://techshop.com/" in v:
+                hrefs[k] = v.replace("http://techshop.com/","")
+
     # Parse table rows
-    for row in techshops_soup.select("table tr"):
+    for row in techshops_soup.select("main-content"):
         cells = row.find_all('td')
         rows_list.append(cells)
 
@@ -173,4 +189,4 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    pass
+    print get_labs(format="json")
