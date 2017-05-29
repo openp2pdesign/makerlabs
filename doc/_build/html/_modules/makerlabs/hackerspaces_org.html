@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>makerlabs.hackerspaces_org &mdash; makerlabs 0.18 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="makerlabs 0.18 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> makerlabs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.18
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">makerlabs</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>makerlabs.hackerspaces_org</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for makerlabs.hackerspaces_org</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Access data from hackerspaces.org</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Massimo Menichinelli</span>
+<span class="c1"># Homepage: http://www.openp2pdesign.org</span>
+<span class="c1"># License: LGPL v.3</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">simplemediawiki</span> <span class="k">import</span> <span class="n">MediaWiki</span>
+<span class="kn">import</span> <span class="nn">mwparserfromhell</span>
+
+<span class="n">hackerspaces_org_api_url</span> <span class="o">=</span> <span class="s2">&quot;https://wiki.hackerspaces.org/w/api.php&quot;</span>
+
+
+<div class="viewcode-block" id="Lab"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.hackerspaces_org.Lab">[docs]</a><span class="k">class</span> <span class="nc">Lab</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Represents a Lab as it is described on hackerspaces.org.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logo</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">country</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">founding</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membercount</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fee</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wiki</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">irc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jabber</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phone</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">youtube</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eventbrite</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">facebook</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ustream</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flickr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twitter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">googleplus</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maillist</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ical</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forum</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">street_address</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postalcode</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_office_box</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equipment</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="get_single_lab"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.hackerspaces_org.get_single_lab">[docs]</a><span class="k">def</span> <span class="nf">get_single_lab</span><span class="p">(</span><span class="n">lab_slug</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets data from a single lab from hackerspaces.org.&quot;&quot;&quot;</span>
+    <span class="n">wiki</span> <span class="o">=</span> <span class="n">MediaWiki</span><span class="p">(</span><span class="n">hackerspaces_org_api_url</span><span class="p">)</span>
+    <span class="n">wiki_response</span> <span class="o">=</span> <span class="n">wiki</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+        <span class="p">{</span><span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;query&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;titles&#39;</span><span class="p">:</span> <span class="n">lab_slug</span><span class="p">,</span>
+         <span class="s1">&#39;prop&#39;</span><span class="p">:</span> <span class="s1">&#39;revisions&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;rvprop&#39;</span><span class="p">:</span> <span class="s1">&#39;content&#39;</span><span class="p">})</span>
+
+    <span class="c1"># If we don&#39;t know the pageid...</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">wiki_response</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">]:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">wiki_response</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Transform the data into a Lab object</span>
+    <span class="n">current_lab</span> <span class="o">=</span> <span class="n">Lab</span><span class="p">()</span>
+
+    <span class="n">equipment_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Parse the Mediawiki code</span>
+    <span class="n">wikicode</span> <span class="o">=</span> <span class="n">mwparserfromhell</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">wikicode</span><span class="o">.</span><span class="n">filter_templates</span><span class="p">():</span>
+        <span class="n">element_name</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;Hackerspace&quot;</span> <span class="ow">in</span> <span class="n">element_name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;logo&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">logo</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;country&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">country</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;city&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;founding&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;coordinate&quot;</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="n">latlong</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="s2">&quot;, &quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">latlong</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="s2">&quot; , &quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">latlong</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot; , &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; , &quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">latlong</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="n">latlong</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="n">latlong</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;membercount&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">membercount</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;fee&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">fee</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;wiki&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">wiki</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;irc&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">irc</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;jabber&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">jabber</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;phone&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">phone</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;youtube&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">youtube</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;eventbrite&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">eventbrite</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;facebook&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">facebook</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ustream&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">ustream</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;flickr&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">flickr</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;twitter&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">twitter</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;googleplus&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">googleplus</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;maillist&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">maillist</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ical&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">ical</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;forum&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">forum</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;street-address&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">street_address</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;postalcode&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">postalcode</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;region&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">region</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;post-office-box&quot;</span><span class="p">:</span>
+                    <span class="n">current_lab</span><span class="o">.</span><span class="n">post_office_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;Equipment&quot;</span> <span class="ow">in</span> <span class="n">element_name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                <span class="n">equipment_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;equipment=&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="n">current_lab</span><span class="o">.</span><span class="n">equipment</span> <span class="o">=</span> <span class="n">equipment_list</span>
+
+    <span class="c1"># Load the free text</span>
+    <span class="n">freetext</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">wikicode</span><span class="o">.</span><span class="n">_nodes</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">test_value</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">freetext</span> <span class="o">+=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">current_lab</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">freetext</span>
+
+    <span class="k">return</span> <span class="n">current_lab</span></div>
+
+
+<div class="viewcode-block" id="get_labs"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.hackerspaces_org.get_labs">[docs]</a><span class="k">def</span> <span class="nf">get_labs</span><span class="p">(</span><span class="nb">format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets data from all labs from hackerspaces.org.&quot;&quot;&quot;</span>
+
+    <span class="n">labs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Get the first page of data</span>
+    <span class="n">wiki</span> <span class="o">=</span> <span class="n">MediaWiki</span><span class="p">(</span><span class="n">hackerspaces_org_api_url</span><span class="p">)</span>
+    <span class="n">wiki_response</span> <span class="o">=</span> <span class="n">wiki</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+        <span class="p">{</span><span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;query&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="s1">&#39;categorymembers&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;cmtitle&#39;</span><span class="p">:</span> <span class="s1">&#39;Category:Hackerspace&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;cmlimit&#39;</span><span class="p">:</span> <span class="s1">&#39;500&#39;</span><span class="p">})</span>
+    <span class="n">nextpage</span> <span class="o">=</span> <span class="n">wiki_response</span><span class="p">[</span><span class="s2">&quot;query-continue&quot;</span><span class="p">][</span><span class="s2">&quot;categorymembers&quot;</span><span class="p">][</span><span class="s2">&quot;cmcontinue&quot;</span><span class="p">]</span>
+
+    <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">wiki_response</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;categorymembers&quot;</span><span class="p">]:</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Load all the Labs in the first page</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+        <span class="n">current_lab</span> <span class="o">=</span> <span class="n">get_single_lab</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">labs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_lab</span><span class="p">)</span>
+
+    <span class="c1"># Load all the Labs from the other pages</span>
+    <span class="k">while</span> <span class="s2">&quot;query-continue&quot;</span> <span class="ow">in</span> <span class="n">wiki_response</span><span class="p">:</span>
+        <span class="n">wiki</span> <span class="o">=</span> <span class="n">MediaWiki</span><span class="p">(</span><span class="n">hackerspaces_org_api_url</span><span class="p">)</span>
+        <span class="n">wiki_response</span> <span class="o">=</span> <span class="n">wiki</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;query&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="s1">&#39;categorymembers&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;cmtitle&#39;</span><span class="p">:</span> <span class="s1">&#39;Category:Hackerspace&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;cmlimit&#39;</span><span class="p">:</span> <span class="s1">&#39;500&#39;</span><span class="p">,</span>
+                                   <span class="s2">&quot;cmcontinue&quot;</span><span class="p">:</span> <span class="n">nextpage</span><span class="p">})</span>
+
+        <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">wiki_response</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;categorymembers&quot;</span><span class="p">]:</span>
+            <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Load all the Labs</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+            <span class="n">current_lab</span> <span class="o">=</span> <span class="n">get_single_lab</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">labs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_lab</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;query-continue&quot;</span> <span class="ow">in</span> <span class="n">wiki_response</span><span class="p">:</span>
+            <span class="n">nextpage</span> <span class="o">=</span> <span class="n">wiki_response</span><span class="p">[</span>
+                <span class="s2">&quot;query-continue&quot;</span><span class="p">][</span><span class="s2">&quot;categorymembers&quot;</span><span class="p">][</span><span class="s2">&quot;cmcontinue&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="c1"># Transform the list into a dictionary</span>
+    <span class="n">labs_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labs</span><span class="p">):</span>
+        <span class="n">labs_dict</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="vm">__dict__</span>
+
+    <span class="c1"># Return a dictiornary / json</span>
+    <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dict&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">labs_dict</span>
+    <span class="c1"># Return a geojson</span>
+    <span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;geojson&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;geo&quot;</span><span class="p">:</span>
+        <span class="n">labs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labs_dict</span><span class="p">:</span>
+            <span class="n">single</span> <span class="o">=</span> <span class="n">labs_dict</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="n">single_lab</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+                <span class="n">geometry</span><span class="o">=</span><span class="n">Point</span><span class="p">((</span><span class="n">single</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span> <span class="n">single</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">])),</span>
+                <span class="n">properties</span><span class="o">=</span><span class="n">single</span><span class="p">)</span>
+            <span class="n">labs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_lab</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">FeatureCollection</span><span class="p">(</span><span class="n">labs_list</span><span class="p">))</span>
+    <span class="c1"># Return an object</span>
+    <span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;obj&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">labs</span>
+    <span class="c1"># Default: return an object</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">labs</span>
+    <span class="c1"># Return a proper json</span>
+    <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">labs_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="labs_count"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.hackerspaces_org.labs_count">[docs]</a><span class="k">def</span> <span class="nf">labs_count</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Gets the number of current Labs registered on hackerspaces.org.&quot;&quot;&quot;</span>
+
+    <span class="n">labs</span> <span class="o">=</span> <span class="n">get_labs</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">labs</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Massimo Menichinelli.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.18',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

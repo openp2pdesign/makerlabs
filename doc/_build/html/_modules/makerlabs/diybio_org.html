@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>makerlabs.diybio_org &mdash; makerlabs 0.18 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="makerlabs 0.18 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> makerlabs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.18
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">makerlabs</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>makerlabs.diybio_org</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for makerlabs.diybio_org</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Access data from diybio.org</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Massimo Menichinelli</span>
+<span class="c1"># Homepage: http://www.openp2pdesign.org</span>
+<span class="c1"># License: LGPL v.3</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="k">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">geojson</span> <span class="k">import</span> <span class="n">dumps</span><span class="p">,</span> <span class="n">Feature</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">FeatureCollection</span>
+<span class="kn">from</span> <span class="nn">geopy.geocoders</span> <span class="k">import</span> <span class="n">Nominatim</span>
+
+
+<span class="c1"># Geocoding variable</span>
+<span class="n">geolocator</span> <span class="o">=</span> <span class="n">Nominatim</span><span class="p">()</span>
+
+<span class="c1"># Endpoints</span>
+<span class="n">diy_bio_labs_url</span> <span class="o">=</span> <span class="s2">&quot;https://diybio.org/local/&quot;</span>
+
+
+<div class="viewcode-block" id="DiyBioLab"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.diybio_org.DiyBioLab">[docs]</a><span class="k">class</span> <span class="nc">DiyBioLab</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a DIYBio Lab as it is described on diybio.org.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">continent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">country_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">country</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lab_type</span> <span class="o">=</span> <span class="s2">&quot;DIYBio Lab&quot;</span></div>
+
+
+<div class="viewcode-block" id="data_from_diybio_org"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.diybio_org.data_from_diybio_org">[docs]</a><span class="k">def</span> <span class="nf">data_from_diybio_org</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Scrapes data from diybio.org.&quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">diy_bio_labs_url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;lxml&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;There was an error while accessing data on diybio.org.&quot;</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="get_labs"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.diybio_org.get_labs">[docs]</a><span class="k">def</span> <span class="nf">get_labs</span><span class="p">(</span><span class="nb">format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets DIYBio Lab data from diybio.org.&quot;&quot;&quot;</span>
+
+    <span class="n">diybiolabs_soup</span> <span class="o">=</span> <span class="n">data_from_diybio_org</span><span class="p">()</span>
+    <span class="n">diybiolabs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">rows_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">continents_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">continents_order</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ranges_starting_points</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Load all the DIYBio Labs</span>
+    <span class="c1"># By first parsing the html</span>
+
+    <span class="c1"># Parse table rows</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">diybiolabs_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;table tr&quot;</span><span class="p">):</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+        <span class="n">rows_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+
+    <span class="c1"># Find the continents in order to iterate over their children td</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows_list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">h3</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">):</span>
+                    <span class="n">ranges_starting_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">continents_dict</span><span class="p">[</span><span class="n">continents_order</span><span class="p">]</span> <span class="o">=</span> <span class="n">h3</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+                    <span class="n">continents_order</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Find the rows of each continent</span>
+    <span class="n">ranges</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">ranges_starting_points</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ranges_starting_points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ranges</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">ranges_starting_points</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                         <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">ranges_starting_points</span><span class="p">[</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The last continent, Oceania</span>
+            <span class="n">ranges</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">ranges_starting_points</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                         <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows_list</span><span class="p">)}</span>
+
+    <span class="c1"># Iterate over the range of each continent to find the Labs</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ranges</span><span class="p">:</span>
+        <span class="c1"># The +1 just avoids the H3 line</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ranges</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]):</span>
+            <span class="c1"># Avoid empty rows by measuring the lenght of the content of each cell and with a boolean check</span>
+            <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">rows_list</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="kc">False</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+                <span class="n">current_lab</span> <span class="o">=</span> <span class="n">DiyBioLab</span><span class="p">()</span>
+                <span class="n">current_lab</span><span class="o">.</span><span class="n">continent</span> <span class="o">=</span> <span class="n">continents_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">rows_list</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                    <span class="c1"># Avoid empty cells</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c1"># If it is a cell with a link</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">current_lab</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+                        <span class="c1"># Otherwise the cell has the city name or country code</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="n">current_lab</span><span class="o">.</span><span class="n">country_code</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">current_lab</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="c1"># Labs do not have coordinates</span>
+                                <span class="c1"># so let&#39;s get them from the city name</span>
+                                <span class="c1"># sand get the full country name from the code</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">location</span> <span class="o">=</span> <span class="n">geolocator</span><span class="o">.</span><span class="n">geocode</span><span class="p">(</span>
+                                        <span class="n">current_lab</span><span class="o">.</span><span class="n">city</span><span class="p">)</span>
+                                    <span class="n">current_lab</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">latitude</span>
+                                    <span class="n">current_lab</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">longitude</span>
+                                    <span class="n">country</span> <span class="o">=</span> <span class="n">geolocator</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span>
+                                        <span class="p">[</span><span class="n">location</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">location</span><span class="o">.</span><span class="n">longitude</span>
+                                         <span class="p">])</span>
+                                    <span class="n">current_lab</span><span class="o">.</span><span class="n">country</span> <span class="o">=</span> <span class="n">country</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span>
+                                        <span class="s1">&#39;address&#39;</span><span class="p">][</span><span class="s1">&#39;country&#39;</span><span class="p">]</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="c1"># For labs without a city</span>
+                                    <span class="c1"># add 0,0 as coordinates</span>
+                                    <span class="n">current_lab</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="mf">0.0</span>
+                                    <span class="n">current_lab</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="c1"># Add the lab, with a slug from the url</span>
+                <span class="k">if</span> <span class="s2">&quot;http://www.&quot;</span> <span class="ow">in</span> <span class="n">current_lab</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+                    <span class="n">slug</span> <span class="o">=</span> <span class="n">current_lab</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;http://www.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;https://www.&quot;</span> <span class="ow">in</span> <span class="n">current_lab</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+                    <span class="n">slug</span> <span class="o">=</span> <span class="n">current_lab</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://www.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">diybiolabs</span><span class="p">[</span><span class="n">slug</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_lab</span>
+
+    <span class="c1"># Return a dictiornary / json</span>
+    <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dict&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">diybiolabs</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">diybiolabs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span>
+    <span class="c1"># Return a geojson</span>
+    <span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;geojson&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;geo&quot;</span><span class="p">:</span>
+        <span class="n">labs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">diybiolabs</span><span class="p">:</span>
+            <span class="n">single</span> <span class="o">=</span> <span class="n">diybiolabs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="n">single_lab</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+                <span class="n">geometry</span><span class="o">=</span><span class="n">Point</span><span class="p">((</span><span class="n">single</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span> <span class="n">single</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">])),</span>
+                <span class="n">properties</span><span class="o">=</span><span class="n">single</span><span class="p">)</span>
+            <span class="n">labs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_lab</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">FeatureCollection</span><span class="p">(</span><span class="n">labs_list</span><span class="p">))</span>
+    <span class="c1"># Return an object</span>
+    <span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span> <span class="ow">or</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;obj&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">diybiolabs</span>
+    <span class="c1"># Default: return an oject</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">diybiolabs</span>
+    <span class="c1"># Return a proper json</span>
+    <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="labs_count"><a class="viewcode-back" href="../../makerlabs.html#makerlabs.diybio_org.labs_count">[docs]</a><span class="k">def</span> <span class="nf">labs_count</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Gets the number of current DIYBio Labs listed on diybio.org.&quot;&quot;&quot;</span>
+
+    <span class="n">diybiolabs</span> <span class="o">=</span> <span class="n">get_labs</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">diybiolabs</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Massimo Menichinelli.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.18',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
