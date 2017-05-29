@@ -10,5 +10,8 @@ Import a module of the package: `from makerlabs import fablabs_io`
 
 Get, for example, the labs: `labs_data = fablabs_io.get_labs(format="dict")`
 
+## Documentation
+[http://makerlabs.readthedocs.io/en/latest/](http://makerlabs.readthedocs.io/en/latest/)
+
 ## History
 This package continues the development of the discontinued package *PyMakerspaces* at [https://pypi.python.org/pypi/PyMakerspaces/](https://pypi.python.org/pypi/PyMakerspaces/)
