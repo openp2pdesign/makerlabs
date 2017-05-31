@@ -28,14 +28,32 @@ class Techshop(object):
     """Represents a Techshop as it is described on techshop.ws."""
 
     def __init__(self):
+        self.source = "techshop.ws"
+        self.id = ""
+        self.name = ""
+        self.lab_type = "Techshop"
         self.continent = ""
         self.city = ""
         self.country_code = ""
         self.country = ""
-        self.url = ""
+        self.address_1 = ""
+        self.address_2 = ""
+        self.postal_code = ""
+        self.county = ""
+        self.state = ""
         self.latitude = ""
         self.longitude = ""
-        self.lab_type = "DIYBio Lab"
+        self.url = ""
+        self.slug = ""
+        self.email = ""
+        self.avatar = ""
+        self.blurb = ""
+        self.description = ""
+        self.phone = ""
+        self.capabilities = ""
+        self.manager = ""
+        self.founding = ""
+        self.links = ""
 
 
 def data_from_techshop_ws(tws_url):
@@ -80,6 +98,9 @@ def get_labs(format):
             if "http://techshop.com/" in v:
                 hrefs[k] = v.replace("http://techshop.com/","")
 
+    print links
+    exit()
+
     # Parse table rows
     for row in techshops_soup.select("main-content"):
         cells = row.find_all('td')
@@ -112,7 +133,7 @@ def get_labs(format):
             # Avoid empty rows by measuring the lenght of the content of each cell and with a boolean check
             rules = [len(n) == 0 for n in rows_list[j]]
             if False in rules:
-                current_lab = DiyBioLab()
+                current_lab = Techshop()
                 current_lab.continent = continents_dict[i]
                 for cell in rows_list[j]:
                     # Avoid empty cells
@@ -150,18 +171,18 @@ def get_labs(format):
                     slug = current_lab.url.replace("http://www.", "")
                 elif "https://www." in current_lab.url:
                     slug = current_lab.url.replace("https://www.", "")
-                diybiolabs[slug] = current_lab
+                techshops[slug] = current_lab
 
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
-        for j in diybiolabs:
-            output[j] = diybiolabs[j].__dict__
+        for j in techshops:
+            output[j] = techshops[j].__dict__
     # Return a geojson
     elif format.lower() == "geojson" or format.lower() == "geo":
         labs_list = []
-        for l in diybiolabs:
-            single = diybiolabs[l].__dict__
+        for l in techshops:
+            single = techshops[l].__dict__
             single_lab = Feature(
                 type="Feature",
                 geometry=Point((single["latitude"], single["longitude"])),
@@ -170,10 +191,10 @@ def get_labs(format):
         output = dumps(FeatureCollection(labs_list))
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
-        output = diybiolabs
+        output = techshops
     # Default: return an oject
     else:
-        output = diybiolabs
+        output = techshops
     # Return a proper json
     if format.lower() == "json":
         output = json.dumps(output)
