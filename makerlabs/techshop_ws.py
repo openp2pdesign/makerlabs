@@ -98,80 +98,73 @@ def get_labs(format):
             if "http://techshop.com/" in v:
                 hrefs[k] = v.replace("http://techshop.com/","")
 
-    print links
+    # Remove duplicate pages
+    hr = []
+    for key, value in hrefs.iteritems():
+        if value not in hr:
+            hr.append(value)
+    hrefs = hr
+
+    # Check all pages
+    for page in hrefs:
+        data = data_from_techshop_ws(page)
+        current_lab = Techshop()
+        name = data.title.contents[0].split('-- ')[1].encode('utf-8')
+        if "TechShop" not in name:
+            name = "TechShop " + name
+        current_lab.name = name
+        current_lab.slug = name
+        current_lab.url = page
+        # Find the coordinates by analysing the embedded google map
+        iframes = data.findAll('iframe')
+        if len(iframes) != 0:
+            for iframe in iframes:
+                embed_url = iframe.attrs["src"]
+                if "google" in embed_url:
+                    two_d = embed_url.find("2d")
+                    three_d = embed_url.find("3d")
+                    longitude = embed_url[two_d:].split('!')[0]
+                    latitude = embed_url[three_d:].split('!')[0]
+                    longitude = longitude[2:]
+                    latitude = latitude[2:]
+        # ... or the link to google map
+        else:
+            page_links = data.findAll('a')
+            for link in page_links:
+                # one case...
+                if "maps.google.com/" in link.attrs["href"]:
+                    embed_url = link.attrs["href"]
+                    if "ll=" in embed_url:
+                        first_string = embed_url.split('&sspn')[0]
+                        coordinates = first_string.split('ll=')[1]
+                        latitude = coordinates.split(',')[0]
+                        longitude = coordinates.split(',')[1]
+                # ... another case
+                elif "www.google.com/maps" in link.attrs["href"]:
+                    embed_url = link.attrs["href"]
+                    if "1d" in embed_url:
+                        one_d = embed_url.find("1d")
+                        two_d = embed_url.find("2d")
+                        longitude = embed_url[one_d:].split('!')[0]
+                        latitude = embed_url[two_d:].split('!')[0]
+                        longitude = longitude[2:]
+                        latitude = latitude[2:]
+        current_lab.latitude = latitude
+        current_lab.longitude = longitude
+        current_lab.continent = "North America"
+        current_lab.country_code = "USA"
+        current_lab.country = "United States of America"
+        location = geolocator.reverse((latitude,longitude))
+        print location.raw["address"]
+
+
+        techshops[current_lab.slug] = current_lab.__dict__
+
+
+    print techshops
     exit()
 
-    # Parse table rows
-    for row in techshops_soup.select("main-content"):
-        cells = row.find_all('td')
-        rows_list.append(cells)
-
-    # Find the continents in order to iterate over their children td
-    for k, row in enumerate(rows_list):
-        for col in row:
-            if col.find('h3'):
-                for h3 in col.findAll('h3'):
-                    ranges_starting_points.append(k)
-                    continents_dict[continents_order] = h3.get_text()
-                    continents_order += 1
-
-    # Find the rows of each continent
-    ranges = {}
-    for k, j in enumerate(reversed(ranges_starting_points)):
-        if k < len(ranges_starting_points) - 1:
-            ranges[k] = {"start": ranges_starting_points[k],
-                         "end": ranges_starting_points[k + 1]}
-        else:
-            # The last continent, Oceania
-            ranges[k] = {"start": ranges_starting_points[k],
-                         "end": len(rows_list)}
-
-    # Iterate over the range of each continent to find the Labs
-    for i in ranges:
-        # The +1 just avoids the H3 line
-        for j in range(ranges[i]["start"] + 1, ranges[i]["end"]):
-            # Avoid empty rows by measuring the lenght of the content of each cell and with a boolean check
-            rules = [len(n) == 0 for n in rows_list[j]]
-            if False in rules:
-                current_lab = Techshop()
-                current_lab.continent = continents_dict[i]
-                for cell in rows_list[j]:
-                    # Avoid empty cells
-                    if len(cell.contents) > 0:
-                        # If it is a cell with a link
-                        try:
-                            current_lab.url = cell.contents[0].attrs['href']
-                        # Otherwise the cell has the city name or country code
-                        except:
-                            if len(cell.contents[0]) < 3:
-                                current_lab.country_code = cell.contents[0]
-                            else:
-                                current_lab.city = cell.contents[0]
-                                # Labs do not have coordinates
-                                # so let's get them from the city name
-                                # sand get the full country name from the code
-                                try:
-                                    location = geolocator.geocode(
-                                        current_lab.city)
-                                    current_lab.latitude = location.latitude
-                                    current_lab.longitude = location.longitude
-                                    country = geolocator.reverse(
-                                        [location.latitude, location.longitude
-                                         ])
-                                    current_lab.country = country.raw[
-                                        'address']['country']
-                                except:
-                                    # For labs without a city
-                                    # add 0,0 as coordinates
-                                    current_lab.latitude = 0.0
-                                    current_lab.longitude = 0.0
-
-                # Add the lab, with a slug from the url
-                if "http://www." in current_lab.url:
-                    slug = current_lab.url.replace("http://www.", "")
-                elif "https://www." in current_lab.url:
-                    slug = current_lab.url.replace("https://www.", "")
-                techshops[slug] = current_lab
+    
 
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
