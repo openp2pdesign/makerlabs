@@ -8,13 +8,15 @@
 #
 #
 
-
 import json
 from bs4 import BeautifulSoup
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
-
+import pycountry
+import us
+from pycountry_convert import convert_country_alpha2_to_continent
+from time import sleep
 
 # Geocoding variable
 geolocator = Nominatim()
@@ -59,8 +61,10 @@ def data_from_diybio_org():
     """Scrapes data from diybio.org."""
 
     r = requests.get(diy_bio_labs_url)
+
     if r.status_code == 200:
-        data = BeautifulSoup(r.text, "lxml")
+        # Fix a problem in the html source while loading it
+        data = BeautifulSoup(r.text.replace(u'\xa0', u''), "lxml")
     else:
         data = "There was an error while accessing data on diybio.org."
 
@@ -114,46 +118,79 @@ def get_labs(format):
             rules = [len(n) == 0 for n in rows_list[j]]
             if False in rules:
                 current_lab = DiyBioLab()
-                current_lab.continent = continents_dict[i]
-                for cell in rows_list[j]:
-                    # Avoid empty cells
-                    if len(cell.contents) > 0:
-                        # If it is a cell with a link
-                        try:
-                            current_lab.url = cell.contents[0].attrs['href']
-                        # Otherwise the cell has the city name or country code
-                        except:
-                            if len(cell.contents[0]) < 3:
-                                current_lab.country_code = cell.contents[0]
-                            else:
-                                current_lab.city = cell.contents[0]
-                                # Labs do not have coordinates
-                                # so let's get them from the city name
-                                # sand get the full country name from the code
-                                try:
-                                    location = geolocator.geocode(
-                                        current_lab.city)
-                                    current_lab.latitude = location.latitude
-                                    current_lab.longitude = location.longitude
-                                    country = geolocator.reverse(
-                                        [location.latitude, location.longitude
-                                         ])
-                                    current_lab.country = country.raw[
-                                        'address']['country']
-                                except:
-                                    # For labs without a city
-                                    # add 0,0 as coordinates
-                                    current_lab.latitude = 0.0
-                                    current_lab.longitude = 0.0
+                current_lab.city = rows_list[j][1].contents[0].encode('utf-8')
+                if continents_dict[i] == "USA-EAST" or continents_dict[
+                        i] == "USA-WEST":
+                    current_lab.state = rows_list[j][2].contents[0].replace(
+                        " ", "").encode('utf-8')
+                else:
+                    current_lab.country_code = rows_list[j][2].contents[
+                        0].encode('utf-8')
+                current_lab.url = rows_list[j][3].contents[0].attrs['href']
+
+                # Data from the USA is not really well formatted
+                if continents_dict[i] == "USA-EAST" or continents_dict[
+                        i] == "USA-WEST":
+                    current_lab.continent = "North America"
+                    current_lab.country_code = "USA"
+                    current_lab.country = "United States of America"
+                    current_lab.state = us.states.lookup(
+                        current_lab.state).name
+                    # Be nice with the geocoder API limit
+                    sleep(1)
+                    location = geolocator.geocode(
+                        {"city": current_lab.city,
+                         "state": current_lab.state,
+                         "country": current_lab.country},
+                        addressdetails=True,
+                        language="EN")
+                    if location is not None:
+                        if "county" in location.raw["address"]:
+                            current_lab.county = location.raw["address"]["county"].encode('utf-8')
+                        # Labs do not have coordinates
+                        # so let's get them from the city name
+                        # sand get the full country name from the code
+                        current_lab.latitude = location.latitude
+                        current_lab.longitude = location.longitude
+                else:
+                    # Be nice with the geocoder API limit
+                    sleep(1)
+                    location = geolocator.geocode(
+                        current_lab.city, addressdetails=True, language="EN")
+                    if "county" in location.raw["address"]:
+                        current_lab.county = location.raw["address"][
+                            "county"].encode('utf-8')
+                    if "state" in location.raw["address"]:
+                        current_lab.state = location.raw["address"][
+                            "state"].encode('utf-8')
+                    if "country" in location.raw["address"]:
+                        current_lab.country = location.raw["address"][
+                            "country"].encode('utf-8')
+                    if "country_code" in location.raw["address"]:
+                        current_lab.country_code = location.raw["address"][
+                            "country_code"].encode('utf-8')
+                    current_lab.continent = convert_country_alpha2_to_continent(
+                        current_lab.country_code.upper())
+                    current_country = pycountry.countries.get(
+                        alpha_2=current_lab.country_code.upper())
+                    current_lab.country_code = current_country.alpha_3
+
+                    # Labs do not have coordinates
+                    # so let's get them from the city name
+                    # sand get the full country name from the code
+                    current_lab.latitude = location.latitude
+                    current_lab.longitude = location.longitude
 
                 # Add the lab, with a slug from the url
                 if "http://www." in current_lab.url:
                     slug = current_lab.url.replace("http://www.", "")
                 elif "https://www." in current_lab.url:
                     slug = current_lab.url.replace("https://www.", "")
+                current_lab.name = slug
+                current_lab.slug = slug
                 diybiolabs[slug] = current_lab
 
-    # Return a dictiornary / json
+    # Return a dictionary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
         for j in diybiolabs:
