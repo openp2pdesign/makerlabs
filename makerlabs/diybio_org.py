@@ -119,6 +119,7 @@ def get_labs(format):
             if False in rules:
                 current_lab = DiyBioLab()
                 current_lab.city = rows_list[j][1].contents[0].encode('utf-8')
+                # Data from the USA is not really well formatted
                 if continents_dict[i] == "USA-EAST" or continents_dict[
                         i] == "USA-WEST":
                     current_lab.state = rows_list[j][2].contents[0].replace(
@@ -127,6 +128,16 @@ def get_labs(format):
                     current_lab.country_code = rows_list[j][2].contents[
                         0].encode('utf-8')
                 current_lab.url = rows_list[j][3].contents[0].attrs['href']
+                # Each lab is identified by the simplified url
+                slug = current_lab.url
+                if "http://" in slug:
+                    slug = slug.replace("http://", "")
+                elif "https://" in slug:
+                    slug = slug.replace("https://", "")
+                if "www." in slug:
+                    slug = slug.replace("www.", "")
+                current_lab.name = slug
+                current_lab.slug = slug
 
                 # Data from the USA is not really well formatted
                 if continents_dict[i] == "USA-EAST" or continents_dict[
@@ -174,24 +185,18 @@ def get_labs(format):
                     current_country = pycountry.countries.get(
                         alpha_2=current_lab.country_code.upper())
                     current_lab.country_code = current_country.alpha_3
-
                     # Labs do not have coordinates
                     # so let's get them from the city name
                     # sand get the full country name from the code
                     current_lab.latitude = location.latitude
                     current_lab.longitude = location.longitude
 
-                # Add the lab, with a slug from the url
-                if "http://www." in current_lab.url:
-                    slug = current_lab.url.replace("http://www.", "")
-                elif "https://www." in current_lab.url:
-                    slug = current_lab.url.replace("https://www.", "")
-                current_lab.name = slug
-                current_lab.slug = slug
+                # Add the lab to the list
                 diybiolabs[slug] = current_lab
+                del current_lab
 
     # Return a dictionary / json
-    if format.lower() == "dict" or format.lower() == "json":
+    if format.lower() == "dict":
         output = {}
         for j in diybiolabs:
             output[j] = diybiolabs[j].__dict__
@@ -214,7 +219,7 @@ def get_labs(format):
         output = diybiolabs
     # Return a proper json
     if format.lower() == "json":
-        output = json.dumps(output)
+        output = json.dumps(diybiolabs)
     return output
 
 
