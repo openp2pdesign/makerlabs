@@ -163,17 +163,11 @@ def get_labs(format):
         current_lab.continent = "North America"
         current_lab.country_code = "USA"
         current_lab.country = "United States of America"
-        # location = geolocator.reverse((latitude,longitude))
-        # print location.raw["address"]
+        location = geolocator.reverse((latitude,longitude))
+        print location.raw["address"]
 
 
-        techshops[current_lab.slug] = current_lab.__dict__
-
-
-    print techshops
-    exit()
-
-
+        techshops[current_lab.slug] = current_lab
 
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
