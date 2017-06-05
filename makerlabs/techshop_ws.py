@@ -74,11 +74,6 @@ def get_labs(format):
     techshops_soup = data_from_techshop_ws(techshop_us_url)
     techshops = {}
 
-    rows_list = []
-    continents_dict = {}
-    continents_order = 0
-    ranges_starting_points = []
-
     # Load all the TechShops
     # By first parsing the html
 
@@ -91,12 +86,12 @@ def get_labs(format):
                 hrefs[k] = a['href']
         for k, v in hrefs.iteritems():
             if "http://techshop.ws/" not in v:
-                hrefs[k] = "http://techshop.ws/"+v
+                hrefs[k] = "http://techshop.ws/" + v
             else:
                 hrefs[k] = v
         for k, v in hrefs.iteritems():
             if "http://techshop.com/" in v:
-                hrefs[k] = v.replace("http://techshop.com/","")
+                hrefs[k] = v.replace("http://techshop.com/", "")
 
     # Remove duplicate pages
     hr = []
@@ -116,7 +111,7 @@ def get_labs(format):
         current_lab.slug = name
         current_lab.url = page
         # Find Facebook and Twitter links
-        current_lab.links = { "facebook" : "", "twitter" : ""}
+        current_lab.links = {"facebook": "", "twitter": ""}
         page_links = data.findAll('a')
         for link in page_links:
             if link.has_attr("href"):
@@ -163,10 +158,22 @@ def get_labs(format):
         current_lab.continent = "North America"
         current_lab.country_code = "USA"
         current_lab.country = "United States of America"
-        location = geolocator.reverse((latitude,longitude))
-        print location.raw["address"]
+        location = geolocator.reverse((latitude, longitude))
+        if "city" in location.raw["address"]:
+            current_lab.county = location.raw["address"]["city"].encode(
+                'utf-8')
+        if "county" in location.raw["address"]:
+            current_lab.county = location.raw["address"]["county"].encode(
+                'utf-8')
+        if "state" in location.raw["address"]:
+            current_lab.state = location.raw["address"]["state"].encode(
+                'utf-8')
+        if "postcode" in location.raw["address"]:
+            current_lab.postal_code = location.raw["address"][
+                "postcode"].encode('utf-8')
+        current_lab.address_1 = location.address.encode('utf-8')
 
-
+        # Add the lab to the list
         techshops[current_lab.slug] = current_lab
 
     # Return a dictiornary / json
@@ -206,4 +213,4 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    print get_labs(format="json")
+    pass
