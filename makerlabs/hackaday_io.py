@@ -31,13 +31,14 @@ API_key = "..."
 # Documented endpoint for the list of hackerspaces
 hackaday_io_labs_api_url = "https://api.hackaday.io/v1/pages/hackerspaces?api_key=" + API_key
 # Undocumented endpoint for the map of hackerspaces
-hackaday_io_labs_map_url = "http://hackaday.io/api/hackerspaceslocations"
+hackaday_io_labs_map_url = "http://hackaday.io/api/location/hackerspaces"
 
 
 class Hackerspace(object):
     """Represents a Hackerspace as it is described on hackaday.io."""
 
     def __init__(self):
+        self.source = "hackaday.io"
         self.id = ""
         self.name = ""
         self.lab_type = "Hackerspace"
@@ -52,7 +53,7 @@ class Hackerspace(object):
         self.state = ""
         self.latitude = ""
         self.longitude = ""
-        self.url = "https://hackaday.io/hackerspace/" + self.id
+        self.url = ""
         self.slug = ""
         self.email = ""
         self.avatar = ""
@@ -83,6 +84,7 @@ def get_labs(format):
     for i in hackerspaces_json:
         current_lab = Hackerspace()
         current_lab.id = i["id"]
+        current_lab.url = "https://hackaday.io/hackerspace/" + current_lab.id
         current_lab.name = i["name"]
         if len(i["description"]) != 0:
             current_lab.description = i["description"]
