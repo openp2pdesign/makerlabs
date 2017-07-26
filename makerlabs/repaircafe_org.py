@@ -16,6 +16,7 @@ from pycountry_convert import convert_country_alpha2_to_continent
 from time import sleep
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import requests
 
 # Geocoding variable
 geolocator = Nominatim()
@@ -83,12 +84,12 @@ def data_from_repaircafe_org():
         sleep(2)
 
     # Load the source code
-    r = BeautifulSoup(browser.page_source, "lxml")
+    page_source = BeautifulSoup(browser.page_source, "lxml")
     # Close the browser
     browser.quit()
     # Parse the source code in order to find all the links under H4s
     data = []
-    for h4 in r.find_all("h4"):
+    for h4 in page_source.find_all("h4"):
         for a in h4.find_all('a', href=True):
             data.append({"name": a.contents[0], "url": a['href']})
 
@@ -102,16 +103,37 @@ def get_labs(format):
 
     repaircafes = {}
 
-    # Load all the FabLabs
-    for i in fablabs_json["labs"]:
-        current_lab = FabLab()
+    # Load all the Repair Cafes
+    for i in data:
+        # Create a lab
+        current_lab = RepairCafe()
+        # Add existing data from first scraping
         current_lab.name = i["name"]
+        slug = i["url"].replace("https://repaircafe.org/locations/", "")
+        if slug.endswith("/"):
+            slug.replace("/", "")
+        current_lab.slug = slug
+        current_lab.url = i["url"]
+        # Scrape for more data
+        page_request = requests.get(i["url"])
+        if page_request.status_code == 200:
+            page_source = BeautifulSoup(page_request.text, "lxml")
+        else:
+            output = "There was an error while accessing data on repaircafe.org."
+
+        columns = page_source.find_all("div", class_="sc_column_item_2")
+        for j in columns:
+            print j
+            for a in j.find_all('a', href=True):
+                print a.contents[0], a['href']
+
+        exit()
+
+        current_lab.links = i["id"]
         current_lab.address_1 = i["address_1"]
         current_lab.address_2 = i["address_2"]
         current_lab.address_notes = i["address_notes"]
-        current_lab.avatar = i["avatar_url"]
         current_lab.blurb = i["blurb"]
-        current_lab.capabilities = i["capabilities"]
         current_lab.city = i["city"]
         current_lab.country_code = i["country_code"]
         current_lab.county = i["county"]
@@ -120,8 +142,7 @@ def get_labs(format):
         current_lab.id = i["id"]
         current_lab.phone = i["phone"]
         current_lab.postal_code = i["postal_code"]
-        current_lab.slug = i["slug"]
-        current_lab.url = i["url"]
+
 
         current_lab.continent = convert_country_alpha2_to_continent(i[
             "country_code"].upper())
@@ -213,4 +234,4 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    print data_from_repaircafe_org()
+    print get_labs(format="json")
