@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-    name='makerlabs',
-    packages=['makerlabs'],
+    name='makerAPI',
+    packages=['makerAPI'],
     install_requires=[
         "kitchen",
         "requests",
@@ -17,8 +17,8 @@ setup(
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
-    url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.18',
+    url='https://github.com/openp2pdesign/makerAPI',
+    download_url='https://github.com/openp2pdesign/makerAPI/releases/tag/v0.20',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop',
               'Makers'],
     classifiers=[
