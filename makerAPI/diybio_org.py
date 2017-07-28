@@ -154,7 +154,7 @@ def get_labs(format):
                          "state": current_lab.state,
                          "country": current_lab.country},
                         addressdetails=True,
-                        language="EN")
+                        language="en")
                     if location is not None:
                         if "county" in location.raw["address"]:
                             current_lab.county = location.raw["address"]["county"].encode('utf-8')
@@ -167,7 +167,7 @@ def get_labs(format):
                     # Be nice with the geocoder API limit
                     sleep(1)
                     location = geolocator.geocode(
-                        current_lab.city, addressdetails=True, language="EN")
+                        current_lab.city, addressdetails=True, language="en")
                     if "county" in location.raw["address"]:
                         current_lab.county = location.raw["address"][
                             "county"].encode('utf-8')

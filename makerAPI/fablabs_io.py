@@ -13,6 +13,9 @@ import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
+import pycountry
+from pycountry_convert import convert_country_alpha2_to_continent
+from time import sleep
 
 
 # Geocoding variable
@@ -103,9 +106,13 @@ def get_labs(format):
     fablabs_json = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
     fablabs = {}
 
+    errorsa = 0
+    errorsb = 0
+
     # Load all the FabLabs
     for i in fablabs_json["labs"]:
         current_lab = FabLab()
+        current_lab.name = i["name"]
         current_lab.address_1 = i["address_1"]
         current_lab.address_2 = i["address_2"]
         current_lab.address_notes = i["address_notes"]
@@ -117,38 +124,63 @@ def get_labs(format):
         current_lab.county = i["county"]
         current_lab.description = i["description"]
         current_lab.email = i["email"]
-        current_lab.header_image_src = i["header_url"]
         current_lab.id = i["id"]
-        current_lab.kind_name = i["kind_name"]
-        # Some labs do not have coordinates
-        if i["latitude"] is None or i["longitude"] is None:
-            address = i["address_1"] + i["city"] + i["country_code"]
-            try:
-                location = geolocator.geocode(address)
-                current_lab.latitude = location.latitude
-                current_lab.longitude = location.longitude
-            except:
-                try:
-                    location = geolocator.geocode(i["city"])
-                    current_lab.latitude = location.latitude
-                    current_lab.longitude = location.longitude
-                except:
-                    # For labs without a city, add 0,0 as coordinates
-                    current_lab.latitude = 0.0
-                    current_lab.longitude = 0.0
-        else:
-            current_lab.latitude = i["latitude"]
-            current_lab.longitude = i["longitude"]
-        current_lab.links = i["links"]
-        current_lab.name = i["name"]
-        current_lab.parent_id = i["parent_id"]
         current_lab.phone = i["phone"]
         current_lab.postal_code = i["postal_code"]
         current_lab.slug = i["slug"]
         current_lab.url = i["url"]
-        # Add the lab
-        fablabs[i["slug"]] = current_lab
 
+        current_lab.continent = convert_country_alpha2_to_continent(i["country_code"].upper())
+        current_country = pycountry.countries.get(alpha_2=i["country_code"].upper())
+        current_lab.country_code = current_country.alpha_3
+        current_lab.country = current_country.name
+
+        if i["longitude"] is None or i["latitude"] is None:
+            # Be nice with the geocoder API limit
+            errorsb += 1
+            # sleep(10)
+            # location = geolocator.geocode(
+            #     {"city": i["city"],
+            #      "country": i["country_code"].upper()},
+            #     addressdetails=True,
+            #     language="en")
+            # if location is not None:
+            #     current_lab.latitude = location.latitude
+            #     current_lab.longitude = location.longitude
+            #     if "county" in location.raw["address"]:
+            #         current_lab.county = location.raw["address"][
+            #             "county"].encode('utf-8')
+            #     if "state" in location.raw["address"]:
+            #         current_lab.state = location.raw["address"][
+            #             "state"].encode('utf-8')
+        else:
+            # Be nice with the geocoder API limit
+            sleep(10)
+            errorsa += 1
+            # location = geolocator.reverse((i["latitude"], i["longitude"]))
+            # if location is not None:
+            #     if "county" in location.raw["address"]:
+            #         current_lab.county = location.raw["address"][
+            #             "county"].encode('utf-8')
+            #     if "state" in location.raw["address"]:
+            #         current_lab.state = location.raw["address"][
+            #             "state"].encode('utf-8')
+
+        # Find Facebook and Twitter links, add also the other ones
+        current_lab.links = {"facebook": "", "twitter": ""}
+        for link in i["links"]:
+            if "facebook" in link["url"]:
+                current_lab.links["facebook"] = link["url"]
+            elif "twitter" in link["url"]:
+                current_lab.links["twitter"] = link["url"]
+            else:
+                current_lab.links[link["id"]] = link["url"]
+
+        # Add the lab to the list
+        fablabs[i["slug"]] = current_lab
+    print "errorsa", errorsa
+    print "errorsb", errorsb
+    exit()
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
@@ -283,4 +315,4 @@ def projects_count():
 
 
 if __name__ == "__main__":
-    pass
+    print get_labs(format="json")

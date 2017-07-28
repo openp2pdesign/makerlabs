@@ -121,11 +121,17 @@ def get_labs(format):
         else:
             output = "There was an error while accessing data on repaircafe.org."
 
-        columns = page_source.find_all("div", class_="sc_column_item_2")
-        for j in columns:
+        # Find links
+        column = page_source.find_all("div", class_="sc_column_item_2")
+        exit()
+        for j in column:
             print j
-            for a in j.find_all('a', href=True):
-                print a.contents[0], a['href']
+            for p in j.find_all('p'):
+                for a in p.find_all('a', href=True):
+                    print a.contents[0], a['href']
+
+        # Find address
+        column = page_source.find_all("div", class_="sc_column_item_1")
 
         exit()
 
