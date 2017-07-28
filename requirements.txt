@@ -43,4 +43,5 @@ six==1.10.0
 Twisted==17.1.0
 us==0.9.1
 w3lib==1.17.0
+webencodings==0.5.1
 zope.interface==4.3.3
