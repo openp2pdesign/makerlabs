@@ -9,6 +9,9 @@
 #
 #
 
+
+from classes import Lab
+
 import json
 import pandas as pd
 from geojson import dumps, Feature, Point, FeatureCollection
@@ -21,36 +24,15 @@ geolocator = Nominatim()
 nesta_uk_url = "https://raw.githubusercontent.com/nesta-uk/UK-makerspaces/master/ukmakerspacesidentifiabledata.csv"
 
 
-class UKMakerspace(object):
+class UKMakerspace(Lab):
     """Represents a UK Makerspace from the NESTA research, in a simplified way."""
 
     def __init__(self):
         self.source = "NESTA"
-        self.id = ""
-        self.name = ""
         self.lab_type = "UK Makerspace from the NESTA"
         self.continent = "Europe"
-        self.city = ""
         self.country_code = "UK"
         self.country = "United Kingdom"
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 def data_from_nesta():

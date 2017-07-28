@@ -9,6 +9,8 @@
 #
 
 
+from classes import Lab
+
 import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
@@ -26,36 +28,12 @@ fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/v0/labs.json"
 fablabs_io_projects_api_url_v0 = "https://api.fablabs.io/v0/projects.json"
 
 
-class FabLab(object):
+class FabLab(Lab):
     """Represents a Fab Lab as it is described on fablabs.io."""
 
     def __init__(self):
         self.source = "fablabs.io"
-        self.id = ""
-        self.name = ""
         self.lab_type = "Fab Lab"
-        self.continent = ""
-        self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 class Project(object):

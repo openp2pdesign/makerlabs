@@ -8,6 +8,9 @@
 #
 #
 
+
+from classes import Lab
+
 import json
 from simplemediawiki import MediaWiki
 import mwparserfromhell
@@ -15,37 +18,13 @@ import mwparserfromhell
 hackerspaces_org_api_url = "https://wiki.hackerspaces.org/w/api.php"
 
 
-class Lab(object):
+class Hackerspace(Lab):
 
-    """Represents a Lab as it is described on hackerspaces.org."""
+    """Represents a Hackerspace as it is described on hackerspaces.org."""
 
     def __init__(self):
         self.source = "hackerspaces.org"
-        self.id = ""
-        self.name = ""
         self.lab_type = "Hackerspace"
-        self.continent = ""
-        self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 def get_single_lab(lab_slug):
@@ -62,7 +41,7 @@ def get_single_lab(lab_slug):
         content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
 
     # Transform the data into a Lab object
-    current_lab = Lab()
+    current_lab = Hackerspace()
 
     equipment_list = []
 
@@ -239,7 +218,7 @@ def get_labs(format):
 
 
 def labs_count():
-    """Gets the number of current Labs registered on hackerspaces.org."""
+    """Gets the number of current Hackerspaces registered on hackerspaces.org."""
 
     labs = get_labs()
 

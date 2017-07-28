@@ -9,6 +9,8 @@
 #
 
 
+from classes import Lab
+
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -24,36 +26,12 @@ techshop_us_url = "http://techshop.ws/locations.html"
 techshop_global_url = "http://techshop.ws/ts_global.html"
 
 
-class Techshop(object):
+class Techshop(Lab):
     """Represents a Techshop as it is described on techshop.ws."""
 
     def __init__(self):
         self.source = "techshop.ws"
-        self.id = ""
-        self.name = ""
         self.lab_type = "Techshop"
-        self.continent = ""
-        self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 def data_from_techshop_ws(tws_url):

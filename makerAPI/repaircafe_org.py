@@ -8,6 +8,9 @@
 #
 #
 
+
+from classes import Lab
+
 import json
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
@@ -26,36 +29,12 @@ fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/v0/labs.json"
 fablabs_io_projects_api_url_v0 = "https://api.fablabs.io/v0/projects.json"
 
 
-class RepairCafe(object):
+class RepairCafe(Lab):
     """Represents a Repair Cafe as it is described on repaircafe.org."""
 
     def __init__(self):
         self.source = "repaircafe.org"
-        self.id = ""
-        self.name = ""
         self.lab_type = "Repair Cafe"
-        self.continent = ""
-        self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 def data_from_repaircafe_org():
