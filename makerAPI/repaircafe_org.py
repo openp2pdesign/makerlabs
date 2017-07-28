@@ -100,88 +100,76 @@ def get_labs(format):
         else:
             output = "There was an error while accessing data on repaircafe.org."
 
-        # Find links
+        # Find Facebook and Twitter links, add also the other ones
+        current_lab.links = {"facebook": "", "twitter": ""}
         column = page_source.find_all("div", class_="sc_column_item_2")
-        exit()
         for j in column:
-            print j
             for p in j.find_all('p'):
                 for a in p.find_all('a', href=True):
-                    print a.contents[0], a['href']
+                    if "facebook" in a['href']:
+                        current_lab.links["facebook"] = a['href']
+                    elif "twitter" in a['href']:
+                        current_lab.links["twitter"] = a['href']
+                    else:
+                        current_lab.links[a['href']] = a['href']
 
         # Find address
         column = page_source.find_all("div", class_="sc_column_item_1")
 
-        exit()
+        # current_lab.address_1 = i["address_1"]
+        # current_lab.address_2 = i["address_2"]
+        # current_lab.address_notes = i["address_notes"]
+        # current_lab.blurb = i["blurb"]
+        # current_lab.city = i["city"]
+        # current_lab.country_code = i["country_code"]
+        # current_lab.county = i["county"]
+        # current_lab.description = i["description"]
+        # current_lab.email = i["email"]
+        # current_lab.id = i["id"]
+        # current_lab.phone = i["phone"]
+        # current_lab.postal_code = i["postal_code"]
+        #
+        #
+        # current_lab.continent = convert_country_alpha2_to_continent(i[
+        #     "country_code"].upper())
+        # current_country = pycountry.countries.get(
+        #     alpha_2=i["country_code"].upper())
+        # current_lab.country_code = current_country.alpha_3
+        # current_lab.country = current_country.name
 
-        current_lab.links = i["id"]
-        current_lab.address_1 = i["address_1"]
-        current_lab.address_2 = i["address_2"]
-        current_lab.address_notes = i["address_notes"]
-        current_lab.blurb = i["blurb"]
-        current_lab.city = i["city"]
-        current_lab.country_code = i["country_code"]
-        current_lab.county = i["county"]
-        current_lab.description = i["description"]
-        current_lab.email = i["email"]
-        current_lab.id = i["id"]
-        current_lab.phone = i["phone"]
-        current_lab.postal_code = i["postal_code"]
-
-
-        current_lab.continent = convert_country_alpha2_to_continent(i[
-            "country_code"].upper())
-        current_country = pycountry.countries.get(
-            alpha_2=i["country_code"].upper())
-        current_lab.country_code = current_country.alpha_3
-        current_lab.country = current_country.name
-
-        if i["longitude"] is None or i["latitude"] is None:
-            # Be nice with the geocoder API limit
-            errorsb += 1
-            # sleep(10)
-            # location = geolocator.geocode(
-            #     {"city": i["city"],
-            #      "country": i["country_code"].upper()},
-            #     addressdetails=True,
-            #     language="en")
-            # if location is not None:
-            #     current_lab.latitude = location.latitude
-            #     current_lab.longitude = location.longitude
-            #     if "county" in location.raw["address"]:
-            #         current_lab.county = location.raw["address"][
-            #             "county"].encode('utf-8')
-            #     if "state" in location.raw["address"]:
-            #         current_lab.state = location.raw["address"][
-            #             "state"].encode('utf-8')
-        else:
-            # Be nice with the geocoder API limit
-            sleep(10)
-            errorsa += 1
-            # location = geolocator.reverse((i["latitude"], i["longitude"]))
-            # if location is not None:
-            #     if "county" in location.raw["address"]:
-            #         current_lab.county = location.raw["address"][
-            #             "county"].encode('utf-8')
-            #     if "state" in location.raw["address"]:
-            #         current_lab.state = location.raw["address"][
-            #             "state"].encode('utf-8')
-
-        # Find Facebook and Twitter links, add also the other ones
-        current_lab.links = {"facebook": "", "twitter": ""}
-        for link in i["links"]:
-            if "facebook" in link["url"]:
-                current_lab.links["facebook"] = link["url"]
-            elif "twitter" in link["url"]:
-                current_lab.links["twitter"] = link["url"]
-            else:
-                current_lab.links[link["id"]] = link["url"]
+        # if i["longitude"] is None or i["latitude"] is None:
+        #     # Be nice with the geocoder API limit
+        #     errorsb += 1
+        #     # sleep(10)
+        #     # location = geolocator.geocode(
+        #     #     {"city": i["city"],
+        #     #      "country": i["country_code"].upper()},
+        #     #     addressdetails=True,
+        #     #     language="en")
+        #     # if location is not None:
+        #     #     current_lab.latitude = location.latitude
+        #     #     current_lab.longitude = location.longitude
+        #     #     if "county" in location.raw["address"]:
+        #     #         current_lab.county = location.raw["address"][
+        #     #             "county"].encode('utf-8')
+        #     #     if "state" in location.raw["address"]:
+        #     #         current_lab.state = location.raw["address"][
+        #     #             "state"].encode('utf-8')
+        # else:
+        #     # Be nice with the geocoder API limit
+        #     sleep(10)
+        #     errorsa += 1
+        #     # location = geolocator.reverse((i["latitude"], i["longitude"]))
+        #     # if location is not None:
+        #     #     if "county" in location.raw["address"]:
+        #     #         current_lab.county = location.raw["address"][
+        #     #             "county"].encode('utf-8')
+        #     #     if "state" in location.raw["address"]:
+        #     #         current_lab.state = location.raw["address"][
+        #     #             "state"].encode('utf-8')
 
         # Add the lab to the list
-        repaircafes[i["slug"]] = current_lab
-    print "errorsa", errorsa
-    print "errorsb", errorsb
-    exit()
+        repaircafes[slug] = current_lab
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
