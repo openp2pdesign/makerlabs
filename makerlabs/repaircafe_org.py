@@ -115,7 +115,11 @@ def get_labs(format):
 
         # Find address
         column = page_source.find_all("div", class_="sc_column_item_1")
+        for x in column:
+            if x.string:
+                print x.string.strip()
 
+        exit()
         # current_lab.address_1 = i["address_1"]
         # current_lab.address_2 = i["address_2"]
         # current_lab.address_notes = i["address_notes"]

@@ -1,8 +1,8 @@
 #from distutils.core import setup
 from setuptools import setup
 setup(
-    name='makerAPI',
-    packages=['makerAPI'],
+    name='makerlabs',
+    packages=['makerlabs'],
     install_requires=[
         "kitchen",
         "requests",

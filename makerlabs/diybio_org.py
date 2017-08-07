@@ -8,6 +8,9 @@
 #
 #
 
+
+from classes import Lab
+
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -25,36 +28,12 @@ geolocator = Nominatim()
 diy_bio_labs_url = "https://diybio.org/local/"
 
 
-class DiyBioLab(object):
+class DiyBioLab(Lab):
     """Represents a DIYBio Lab as it is described on diybio.org."""
 
     def __init__(self):
         self.source = "diybio.org"
-        self.id = ""
-        self.name = ""
         self.lab_type = "DIYBio Lab"
-        self.continent = ""
-        self.city = ""
-        self.country_code = ""
-        self.country = ""
-        self.address_1 = ""
-        self.address_2 = ""
-        self.postal_code = ""
-        self.county = ""
-        self.state = ""
-        self.latitude = ""
-        self.longitude = ""
-        self.url = ""
-        self.slug = ""
-        self.email = ""
-        self.avatar = ""
-        self.blurb = ""
-        self.description = ""
-        self.phone = ""
-        self.capabilities = ""
-        self.manager = ""
-        self.founding = ""
-        self.links = ""
 
 
 def data_from_diybio_org():
