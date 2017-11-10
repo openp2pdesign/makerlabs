@@ -5,6 +5,8 @@
 
 .. image:: images/makerlabs_logo_100.png
 
+
+
 A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop... and for formatting the data in order to give a unified API for understanding Maker platforms.
 
 .. toctree::

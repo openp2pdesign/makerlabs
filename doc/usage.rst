@@ -13,7 +13,5 @@ Get, for example, the labs:
 
 ``labs_data = fablabs_io.get_labs(format="dict")``
 
-See more here: 
-
-:ref:`modindex`
+See more here: :ref:`modindex`
 
