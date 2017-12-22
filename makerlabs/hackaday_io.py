@@ -15,6 +15,7 @@ import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
+import pandas as pd
 
 # Geocoding variable
 geolocator = Nominatim()
@@ -116,6 +117,14 @@ def get_labs(format):
                 properties=single)
             labs_list.append(single_lab)
         output = dumps(FeatureCollection(labs_list))
+    # Return a Pandas DataFrame
+    elif format.lower() == "pandas" or format.lower() == "dataframe":
+        output = {}
+        for j in hackerspaces:
+            output[j] = hackerspaces[j].__dict__
+        # Transform the dict into a Pandas DataFrame
+        output = pd.DataFrame.from_dict(output)
+        output = output.transpose()
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = hackerspaces

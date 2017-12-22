@@ -14,6 +14,7 @@ from classes import Lab
 import json
 from simplemediawiki import MediaWiki
 import mwparserfromhell
+import pandas as pd
 
 hackerspaces_org_api_url = "https://wiki.hackerspaces.org/w/api.php"
 
@@ -205,6 +206,14 @@ def get_labs(format):
                 properties=single)
             labs_list.append(single_lab)
         output = dumps(FeatureCollection(labs_list))
+    # Return a Pandas DataFrame
+    elif format.lower() == "pandas" or format.lower() == "dataframe":
+        output = {}
+        for j in labs_dict:
+            output[j] = labs_dict[j].__dict__
+        # Transform the dict into a Pandas DataFrame
+        output = pd.DataFrame.from_dict(output)
+        output = output.transpose()
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = labs

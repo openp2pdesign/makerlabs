@@ -12,7 +12,8 @@ setup(
         "geojson",
         "geopy",
         "beautifulsoup4",
-        "lxml"
+        "lxml",
+        "pandas"
     ],
     version='0.18',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
