@@ -18,6 +18,7 @@ from geopy.geocoders import Nominatim
 import pycountry
 from pycountry_convert import convert_country_alpha2_to_continent
 from time import sleep
+import pandas as pd
 
 
 # Geocoding variable
@@ -84,9 +85,6 @@ def get_labs(format):
     fablabs_json = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
     fablabs = {}
 
-    errorsa = 0
-    errorsb = 0
-
     # Load all the FabLabs
     for i in fablabs_json["labs"]:
         current_lab = FabLab()
@@ -113,36 +111,15 @@ def get_labs(format):
         current_lab.country_code = current_country.alpha_3
         current_lab.country = current_country.name
 
-        if i["longitude"] is None or i["latitude"] is None:
-            # Be nice with the geocoder API limit
-            errorsb += 1
-            # sleep(10)
-            # location = geolocator.geocode(
-            #     {"city": i["city"],
-            #      "country": i["country_code"].upper()},
-            #     addressdetails=True,
-            #     language="en")
-            # if location is not None:
-            #     current_lab.latitude = location.latitude
-            #     current_lab.longitude = location.longitude
-            #     if "county" in location.raw["address"]:
-            #         current_lab.county = location.raw["address"][
-            #             "county"].encode('utf-8')
-            #     if "state" in location.raw["address"]:
-            #         current_lab.state = location.raw["address"][
-            #             "state"].encode('utf-8')
+        # Check coordinates
+        if i["longitude"] is not None:
+            current_lab.longitude = i["longitude"]
         else:
-            # Be nice with the geocoder API limit
-            sleep(10)
-            errorsa += 1
-            # location = geolocator.reverse((i["latitude"], i["longitude"]))
-            # if location is not None:
-            #     if "county" in location.raw["address"]:
-            #         current_lab.county = location.raw["address"][
-            #             "county"].encode('utf-8')
-            #     if "state" in location.raw["address"]:
-            #         current_lab.state = location.raw["address"][
-            #             "state"].encode('utf-8')
+            current_lab.longitude = 0.0
+        if i["latitude"] is not None:
+            current_lab.latitude = i["latitude"]
+        else:
+            current_lab.latitude = 0.0
 
         # Find Facebook and Twitter links, add also the other ones
         current_lab.links = {"facebook": "", "twitter": ""}
@@ -156,9 +133,7 @@ def get_labs(format):
 
         # Add the lab to the list
         fablabs[i["slug"]] = current_lab
-    print "errorsa", errorsa
-    print "errorsb", errorsb
-    exit()
+
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
@@ -175,6 +150,14 @@ def get_labs(format):
                 properties=single)
             labs_list.append(single_lab)
         output = dumps(FeatureCollection(labs_list))
+    # Return a Pandas DataFrame
+    elif format.lower() == "pandas" or format.lower() == "dataframe":
+        output = {}
+        for j in fablabs:
+            output[j] = fablabs[j].__dict__
+        # Transform the dict into a Pandas DataFrame
+        output = pd.DataFrame.from_dict(output)
+        output = output.transpose()
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = fablabs
