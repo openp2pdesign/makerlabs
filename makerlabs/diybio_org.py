@@ -198,6 +198,7 @@ def get_labs(format):
             output[j] = diybiolabs[j].__dict__
         # Transform the dict into a Pandas DataFrame
         output = pd.DataFrame.from_dict(output)
+        # Put labs names as the index, to make it coherent with other APIs
         output = output.transpose()
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":

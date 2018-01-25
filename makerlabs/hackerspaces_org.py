@@ -52,6 +52,10 @@ def get_single_lab(lab_slug):
         element_name = unicode(k.name)
         if "Hackerspace" in element_name:
             for j in k.params:
+                current_lab.name = lab_slug
+                # Remove new line in content
+                if j.value[-2:] == "\n" or j.value[:2] == "\n":
+                    j.value = j.value.replace('\n', '')
                 if unicode(j.name) == "logo":
                     current_lab.logo = unicode(j.value)
                 if unicode(j.name) == "country":
@@ -208,12 +212,11 @@ def get_labs(format):
         output = dumps(FeatureCollection(labs_list))
     # Return a Pandas DataFrame
     elif format.lower() == "pandas" or format.lower() == "dataframe":
-        output = {}
-        for j in labs_dict:
-            output[j] = labs_dict[j].__dict__
+        output = labs_dict
         # Transform the dict into a Pandas DataFrame
         output = pd.DataFrame.from_dict(output)
         output = output.transpose()
+        output = output.set_index(['name'])
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = labs
