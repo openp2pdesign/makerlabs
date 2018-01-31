@@ -10,20 +10,14 @@
 
 
 from classes import Lab
+from utils import get_direct_location
 
 import json
 from bs4 import BeautifulSoup
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
-from geopy.geocoders import Nominatim
-import pycountry
 import us
-from pycountry_convert import convert_country_alpha2_to_continent
-from time import sleep
 import pandas as pd
-
-# Geocoding variable
-geolocator = Nominatim()
 
 # Endpoints
 diy_bio_labs_url = "https://diybio.org/local/"
@@ -51,7 +45,7 @@ def data_from_diybio_org():
     return data
 
 
-def get_labs(format):
+def get_labs(format, open_cage_api_key):
     """Gets DIYBio Lab data from diybio.org."""
 
     diybiolabs_soup = data_from_diybio_org()
@@ -120,56 +114,23 @@ def get_labs(format):
                 current_lab.slug = slug
 
                 # Data from the USA is not really well formatted
-                if continents_dict[i] == "USA-EAST" or continents_dict[
-                        i] == "USA-WEST":
+                if continents_dict[i] == "USA-EAST" or continents_dict[i] == "USA-WEST":
                     current_lab.continent = "North America"
                     current_lab.country_code = "USA"
                     current_lab.country = "United States of America"
                     current_lab.state = us.states.lookup(
                         current_lab.state).name
-                    # Be nice with the geocoder API limit
-                    sleep(1)
-                    location = geolocator.geocode(
-                        {"city": current_lab.city,
-                         "state": current_lab.state,
-                         "country": current_lab.country},
-                        addressdetails=True,
-                        language="en")
-                    if location is not None:
-                        if "county" in location.raw["address"]:
-                            current_lab.county = location.raw["address"]["county"].encode('utf-8')
-                        # Labs do not have coordinates
-                        # so let's get them from the city name
-                        # sand get the full country name from the code
-                        current_lab.latitude = location.latitude
-                        current_lab.longitude = location.longitude
-                else:
-                    # Be nice with the geocoder API limit
-                    sleep(1)
-                    location = geolocator.geocode(
-                        current_lab.city, addressdetails=True, language="en")
-                    if "county" in location.raw["address"]:
-                        current_lab.county = location.raw["address"][
-                            "county"].encode('utf-8')
-                    if "state" in location.raw["address"]:
-                        current_lab.state = location.raw["address"][
-                            "state"].encode('utf-8')
-                    if "country" in location.raw["address"]:
-                        current_lab.country = location.raw["address"][
-                            "country"].encode('utf-8')
-                    if "country_code" in location.raw["address"]:
-                        current_lab.country_code = location.raw["address"][
-                            "country_code"].encode('utf-8')
-                    current_lab.continent = convert_country_alpha2_to_continent(
-                        current_lab.country_code.upper())
-                    current_country = pycountry.countries.get(
-                        alpha_2=current_lab.country_code.upper())
-                    current_lab.country_code = current_country.alpha_3
-                    # Labs do not have coordinates
-                    # so let's get them from the city name
-                    # sand get the full country name from the code
-                    current_lab.latitude = location.latitude
-                    current_lab.longitude = location.longitude
+
+                # Get address from city
+                address = get_direct_location(query=current_lab.city, api_key=open_cage_api_key)
+                current_lab.address_1 = address["address_1"]
+                current_lab.country = address["country"]
+                current_lab.country_code = address["country_code"]
+                current_lab.latitude = address["latitude"]
+                current_lab.longitude = address["longitude"]
+                current_lab.county = address["county"]
+                current_lab.postal_code = address["postal_code"]
+                current_lab.state = address["state"]
 
                 # Add the lab to the list
                 diybiolabs[slug] = current_lab
