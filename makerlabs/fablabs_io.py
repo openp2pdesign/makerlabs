@@ -95,6 +95,8 @@ def get_labs(format):
         current_lab.avatar = i["avatar_url"]
         current_lab.blurb = i["blurb"]
         current_lab.capabilities = i["capabilities"]
+        if i["city"].isupper():
+            i["city"] = i["city"].title()
         current_lab.city = i["city"]
         current_lab.country_code = i["country_code"]
         current_lab.county = i["county"]
