@@ -10,12 +10,12 @@
 
 
 from classes import Lab
+from utils import get_reverse_location
 
 import json
 from simplemediawiki import MediaWiki
 import mwparserfromhell
 import pandas as pd
-from incf.countryutils import transformations
 
 hackerspaces_org_api_url = "https://wiki.hackerspaces.org/w/api.php"
 
@@ -29,7 +29,7 @@ class Hackerspace(Lab):
         self.lab_type = "Hackerspace"
 
 
-def get_single_lab(lab_slug):
+def get_single_lab(lab_slug, open_cage_api_key):
     """Gets data from a single lab from hackerspaces.org."""
     wiki = MediaWiki(hackerspaces_org_api_url)
     wiki_response = wiki.call(
@@ -59,32 +59,31 @@ def get_single_lab(lab_slug):
                 # Remove new line in content
                 if j_value[-1:] == "\n" or j_value[:1] == "\n":
                     j_value = j_value.replace('\n', '')
-                if unicode(j.name) == "logo":
+                if j_name == "logo":
                     current_lab.logo = j_value
-                if j_name == "country":
-                    current_lab.country = j_value
-                    try:
-                        current_lab.continent = transformations.cn_to_ctn(current_lab.country)
-                    except Exception as e:
-                        current_lab.continent = None
-                if j_name == "state":
-                    current_lab.state = j_value
-                if j_name == "city":
-                    current_lab.city = j_value
                 if j_name == "founding":
-                    current_lab.city = j_value
+                    current_lab.founding = j_value
                 if j_name == "coordinate":
-                    value = j_value
-                    current_lab.coordinates = value
-                    latlong = []
-                    if ", " in value:
-                        latlong = value.rstrip(", ").split(", ")
-                    elif " , " in value:
-                        latlong = value.rstrip(" , ").split(" , ")
-                    else:
-                        latlong = ["", ""]
-                    current_lab.latitude = latlong[0]
-                    current_lab.longitude = latlong[1]
+                    # Clean the coordinates
+                    j_value = j_value.replace('"', '')
+                    j_value = j_value.replace('N', '')
+                    j_value = j_value.replace('S', '')
+                    j_value = j_value.replace('W', '')
+                    j_value = j_value.replace('E', '')
+                    j_value = j_value.replace(u'°', '')
+                    j_value = j_value.replace(' ', '')
+                    # Get the full address with the coordinates
+                    address = get_location(query=j_value, format="reverse", api_key=open_cage_api_key)
+                    current_lab.city = address["city"]
+                    current_lab.county = address["county"]
+                    current_lab.state = address["state"]
+                    current_lab.postal_code = address["postal_code"]
+                    current_lab.address_1 = address["address_1"]
+                    current_lab.country = address["country"]
+                    current_lab.country_code = address["country_code"]
+                    current_lab.continent = address["continent"]
+                    current_lab.latitude = address["latitude"]
+                    current_lab.longitude = address["longitude"]
                 if j_name == "membercount":
                     current_lab.membercount = j_value
                 if j_name == "fee":
@@ -125,19 +124,11 @@ def get_single_lab(lab_slug):
                     current_lab.ical = j_value
                 if j_name == "forum":
                     current_lab.forum = j_value
-                if j_name == "street-address":
-                    current_lab.street_address = j_value
-                if j_name == "postalcode":
-                    current_lab.postalcode = j_value
-                if j_name == "region":
-                    current_lab.region = j_value
-                if j_name == "post-office-box":
-                    current_lab.post_office_box = j_value
         elif "Equipment" in element_name:
             for j in k.params:
                 equipment_list.append(j.replace("equipment=", ""))
 
-    current_lab.equipment = equipment_list
+            current_lab.equipment = equipment_list
 
     # Load the free text
     freetext = ""
@@ -151,7 +142,7 @@ def get_single_lab(lab_slug):
     return current_lab
 
 
-def get_labs(format):
+def get_labs(format, open_cage_api_key):
     """Gets data from all labs from hackerspaces.org."""
 
     labs = []
@@ -171,7 +162,7 @@ def get_labs(format):
 
     # Load all the Labs in the first page
     for i in urls:
-        current_lab = get_single_lab(i)
+        current_lab = get_single_lab(i, open_cage_api_key)
         labs.append(current_lab)
 
     # Load all the Labs from the other pages
@@ -189,7 +180,7 @@ def get_labs(format):
 
         # Load all the Labs
         for i in urls:
-            current_lab = get_single_lab(i)
+            current_lab = get_single_lab(i, open_cage_api_key)
             labs.append(current_lab)
 
         if "query-continue" in wiki_response:
