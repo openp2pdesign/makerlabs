@@ -10,7 +10,7 @@
 
 
 from classes import Lab
-from utils import get_direct_location
+from utils import get_location
 
 import json
 from bs4 import BeautifulSoup
@@ -122,7 +122,10 @@ def get_labs(format, open_cage_api_key):
                         current_lab.state).name
 
                 # Get address from city
-                address = get_direct_location(query=current_lab.city, api_key=open_cage_api_key)
+                address = get_location(query=current_lab.city, format="direct", api_key=open_cage_api_key)
+                current_lab.continent = address["continent"]
+                current_lab.latitude = address["latitude"]
+                current_lab.longitude = address["longitude"]
                 current_lab.address_1 = address["address_1"]
                 current_lab.country = address["country"]
                 current_lab.country_code = address["country_code"]
