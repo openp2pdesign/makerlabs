@@ -20,6 +20,7 @@ def get_location(query, format, api_key):
 
     # Play nice with the API...
     sleep(1)
+    geolocator = OpenCage(api_key=api_key, timeout=10)
 
     # Variables for storing the data
     data = {"city": None,
@@ -47,13 +48,12 @@ def get_location(query, format, api_key):
                      "lat": None,
                      "lng": None}
 
-    # Inverse geocoding ... from coordinates to address
-    if format == "inverse":
+    # Reverse geocoding ... from coordinates to address
+    if format == "reverse":
         # If the query (coordinates) is not empty
         if query is None or len(query) < 3:
             pass
         else:
-            geolocator = OpenCage(api_key=api_key, timeout=10)
             location = geolocator.reverse(query)
             if location is not None:
                 location_data = location[0].raw[u'components']
@@ -65,7 +65,6 @@ def get_location(query, format, api_key):
         if query is None or len(query) < 3:
             pass
         else:
-            geolocator = OpenCage(api_key=api_key, timeout=10)
             location = geolocator.geocode(query)
             if location is not None:
                 location_data = location.raw[u'components']
@@ -95,8 +94,11 @@ def get_location(query, format, api_key):
     data["latitude"] = location_data["lat"]
     data["longitude"] = location_data["lng"]
     # Format the country code to three letters
-    country_data = transformations.cca2_to_ccn(data["country_code"])
-    data["country_code"] = transformations.ccn_to_cca3(country_data)
+    try:
+        country_data = transformations.cca2_to_ccn(data["country_code"])
+        data["country_code"] = transformations.ccn_to_cca3(country_data)
+    except:
+        data["country_code"] = None
     # Get the continent
     try:
         country_data = transformations.cc_to_cn(data["country_code"])
@@ -106,6 +108,7 @@ def get_location(query, format, api_key):
 
     # Return the final data
     return data
+
 
 if __name__ == "__main__":
     pass

@@ -13,9 +13,12 @@ setup(
         "geopy",
         "beautifulsoup4",
         "lxml",
-        "pandas"
+        "pandas",
+        "us",
+        "incf.countryutils",
+        "selenium"
     ],
-    version='0.19',
+    version='0.20',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
