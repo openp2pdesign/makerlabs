@@ -9,11 +9,14 @@
 
 A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop... and for formatting the data in order to give a unified API for understanding Maker platforms.
 
+See an example of what can be done with the data on the MakerSpacesRadar_
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
-   usage
+
+   install
+   makerlabs_example.ipynb
    credits
 
 
@@ -24,3 +27,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _MakerSpacesRadar: http://makerspacesradar.make-it.io/
