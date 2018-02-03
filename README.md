@@ -1,6 +1,6 @@
 ![](doc/images/makerlabs_logo_100.png)
 
-[![Documentation Status](https://readthedocs.org/projects/makerlabs/badge/?version=latest)](http://makerlabs.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/makerlabs.svg)](https://badge.fury.io/py/makerlabs) [![Documentation Status](https://readthedocs.org/projects/makerlabs/badge/?version=latest)](http://makerlabs.readthedocs.io/en/latest/?badge=latest)
 
 A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop... and for formatting the data in order to give a unified API for understanding Maker platforms.
 
