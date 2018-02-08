@@ -13,7 +13,7 @@ Import a module of the package: `from makerlabs import fablabs_io`
 
 Get, for example, the labs: `labs_data = fablabs_io.get_labs(format="dict")`
 
-Full documentation at [http://makerlabs.readthedocs.io/en/latest/](http://makerlabs.readthedocs.io/en/latest/)
+Full documentation at [http://makerlabs.readthedocs.io/](http://makerlabs.readthedocs.io/)
 
 ## License
 
