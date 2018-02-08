@@ -15,6 +15,7 @@ setup(
         "lxml",
         "pandas",
         "us",
+        "pycountry",
         "incf.countryutils",
         "selenium"
     ],
