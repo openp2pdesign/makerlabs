@@ -16,7 +16,7 @@ import requests
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
 import pycountry
-from pycountry_convert import convert_country_alpha2_to_continent
+from pycountry_convert import country_alpha2_to_continent_code
 from time import sleep
 import pandas as pd
 
@@ -108,7 +108,7 @@ def get_labs(format):
         current_lab.slug = i["slug"]
         current_lab.url = i["url"]
 
-        current_lab.continent = convert_country_alpha2_to_continent(i["country_code"].upper())
+        current_lab.continent = country_alpha2_to_continent_code(i["country_code"].upper())
         current_country = pycountry.countries.get(alpha_2=i["country_code"].upper())
         current_lab.country_code = current_country.alpha_3
         current_lab.country = current_country.name

@@ -18,9 +18,10 @@ setup(
         "pycountry",
         "pycountry_convert",
         "incf.countryutils",
-        "selenium"
+        "selenium",
+        "chromedriver-installer"
     ],
-    version='0.21.2',
+    version='0.21.3',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',

@@ -15,12 +15,14 @@ import json
 from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
 import pycountry
-from pycountry_convert import convert_country_alpha2_to_continent
+from pycountry_convert import country_alpha2_to_continent_code
 from time import sleep
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+
+from utils import get_location
 
 
 # Geocoding variable
@@ -43,9 +45,9 @@ def data_from_repaircafe_org():
     """Gets data from repaircafe_org."""
 
     # Use Chrome as a browser
-    # browser = webdriver.Chrome()
+    browser = webdriver.Chrome()
     # Use PhantomJS as a browser
-    browser = webdriver.PhantomJS('phantomjs')
+    # browser = webdriver.PhantomJS('phantomjs')
     browser.get("https://repaircafe.org/en/?s=Contact+the+local+organisers")
     browser.maximize_window()
 
@@ -136,7 +138,7 @@ def get_labs(format):
         # current_lab.postal_code = i["postal_code"]
         #
         #
-        # current_lab.continent = convert_country_alpha2_to_continent(i[
+        # current_lab.continent = country_alpha2_to_continent_code(i[
         #     "country_code"].upper())
         # current_country = pycountry.countries.get(
         #     alpha_2=i["country_code"].upper())

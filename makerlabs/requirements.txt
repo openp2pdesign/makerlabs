@@ -35,7 +35,7 @@ py==1.5.2
 pyasn1==0.2.3
 pyasn1-modules==0.0.8
 pycountry==17.5.14
-pycountry-convert==0.6.6
+pycountry-convert==0.7.2
 pycparser==2.17
 PyDispatcher==2.0.5
 pyOpenSSL==16.2.0
