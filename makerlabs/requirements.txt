@@ -9,7 +9,7 @@ chardet==3.0.4
 chromedriver-installer==0.0.6
 constantly==15.1.0
 coverage==4.5
-cryptography==1.8.1
+cryptography==3.2
 cssselect==1.0.1
 enum34==1.1.6
 funcsigs==1.0.2
