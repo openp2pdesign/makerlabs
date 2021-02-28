@@ -51,7 +51,7 @@ selenium==3.3.3
 service-identity==16.0.0
 simplemediawiki==1.1.1
 six==1.10.0
-Twisted==17.1.0
+Twisted==20.3.0
 urllib3==1.22
 us==0.9.1
 w3lib==1.17.0
