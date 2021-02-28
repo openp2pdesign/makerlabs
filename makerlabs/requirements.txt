@@ -46,7 +46,7 @@ pytest-mock==1.6.3
 python-dateutil==2.6.0
 pytz==2016.10
 queuelib==1.4.2
-requests==2.9.0
+requests==2.20.0
 selenium==3.3.3
 service-identity==16.0.0
 simplemediawiki==1.1.1
