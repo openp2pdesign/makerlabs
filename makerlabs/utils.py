@@ -12,7 +12,7 @@
 
 from geopy.geocoders import OpenCage
 from time import sleep
-from incf.countryutils import transformations
+import pycountry
 
 
 def get_location(query, format, api_key):
@@ -95,14 +95,13 @@ def get_location(query, format, api_key):
     data["longitude"] = location_data["lng"]
     # Format the country code to three letters
     try:
-        country_data = transformations.cca2_to_ccn(data["country_code"])
-        data["country_code"] = transformations.ccn_to_cca3(country_data)
+        data["country_code"] = pycountry.countries.get(alpha_2=data["country_code"]).alpha_3
     except:
         data["country_code"] = None
     # Get the continent
     try:
-        country_data = transformations.cc_to_cn(data["country_code"])
-        data["continent"] = transformations.cn_to_ctn(country_data)
+        continent_code = pycountry.country_alpha2_to_continent_code(data["country_code"])
+        data["continent"] = pycountry.convert_continent_code_to_continent_name(continent_code)
     except:
         data["continent"] = None
 

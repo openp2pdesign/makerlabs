@@ -16,12 +16,10 @@ setup(
         "pandas",
         "us",
         "pycountry",
-        "pycountry_convert",
-        "incf.countryutils",
         "selenium",
         "chromedriver-installer"
     ],
-    version='0.21.3',
+    version='0.22.0',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
