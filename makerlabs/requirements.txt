@@ -20,7 +20,7 @@ incremental==16.10.1
 ipaddress==1.0.18
 jellyfish==0.5.1
 kitchen==1.2.4
-lxml==3.7.3
+lxml==4.6.5
 mock==2.0.0
 mwparserfromhell==0.4.3
 numpy==1.12.1
