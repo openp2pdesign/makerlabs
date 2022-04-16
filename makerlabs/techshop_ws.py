@@ -9,7 +9,7 @@
 #
 
 
-from classes import Lab
+from .classes import Lab
 
 import json
 from bs4 import BeautifulSoup
@@ -63,18 +63,18 @@ def get_labs(format):
         for k, a in enumerate(links):
             if "contact" not in a['href']:
                 hrefs[k] = a['href']
-        for k, v in hrefs.iteritems():
+        for k, v in hrefs.items():
             if "http://techshop.ws/" not in v:
                 hrefs[k] = "http://techshop.ws/" + v
             else:
                 hrefs[k] = v
-        for k, v in hrefs.iteritems():
+        for k, v in hrefs.items():
             if "http://techshop.com/" in v:
                 hrefs[k] = v.replace("http://techshop.com/", "")
 
     # Remove duplicate pages
     hr = []
-    for key, value in hrefs.iteritems():
+    for key, value in hrefs.items():
         if value not in hr:
             hr.append(value)
     hrefs = hr

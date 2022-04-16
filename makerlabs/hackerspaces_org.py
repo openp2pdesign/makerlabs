@@ -9,8 +9,8 @@
 #
 
 
-from classes import Lab
-from utils import get_location
+from .classes import Lab
+from .utils import get_location
 
 import json
 from simplemediawiki import MediaWiki
@@ -50,12 +50,12 @@ def get_single_lab(lab_slug, open_cage_api_key):
     # Parse the Mediawiki code
     wikicode = mwparserfromhell.parse(content)
     for k in wikicode.filter_templates():
-        element_name = unicode(k.name)
+        element_name = str(k.name)
         if "Hackerspace" in element_name:
             for j in k.params:
                 current_lab.name = lab_slug
-                j_value = unicode(j.value)
-                j_name = unicode(j.name)
+                j_value = str(j.value)
+                j_name = str(j.name)
                 # Remove new line in content
                 if j_value[-1:] == "\n" or j_value[:1] == "\n":
                     j_value = j_value.replace('\n', '')
@@ -70,7 +70,7 @@ def get_single_lab(lab_slug, open_cage_api_key):
                     j_value = j_value.replace('S', '')
                     j_value = j_value.replace('W', '')
                     j_value = j_value.replace('E', '')
-                    j_value = j_value.replace(u'°', '')
+                    j_value = j_value.replace('°', '')
                     j_value = j_value.replace(' ', '')
                     # Get the full address with the coordinates
                     address = get_location(query=j_value, format="reverse", api_key=open_cage_api_key)
@@ -136,7 +136,7 @@ def get_single_lab(lab_slug, open_cage_api_key):
         try:
             test_value = k.name
         except AttributeError:
-            freetext += unicode(k)
+            freetext += str(k)
     current_lab.text = freetext
 
     return current_lab

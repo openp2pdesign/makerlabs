@@ -9,7 +9,7 @@
 #
 
 
-from classes import Lab
+from .classes import Lab
 
 import json
 import requests
@@ -279,4 +279,4 @@ def projects_count():
 
 
 if __name__ == "__main__":
-    print get_labs(format="json")
+    print(get_labs(format="json"))

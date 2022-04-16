@@ -9,8 +9,8 @@
 #
 
 
-from classes import Lab
-from utils import get_location
+from .classes import Lab
+from .utils import get_location
 
 import json
 from bs4 import BeautifulSoup
@@ -38,7 +38,7 @@ def data_from_diybio_org():
 
     if r.status_code == 200:
         # Fix a problem in the html source while loading it
-        data = BeautifulSoup(r.text.replace(u'\xa0', u''), "lxml")
+        data = BeautifulSoup(r.text.replace('\xa0', ''), "lxml")
     else:
         data = "There was an error while accessing data on diybio.org."
 

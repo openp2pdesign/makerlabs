@@ -10,7 +10,7 @@
 #
 
 
-from classes import Lab
+from .classes import Lab
 
 import json
 import pandas as pd

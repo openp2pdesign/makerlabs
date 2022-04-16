@@ -56,9 +56,9 @@ def get_location(query, format, api_key):
         else:
             location = geolocator.reverse(query)
             if location is not None:
-                location_data = location[0].raw[u'components']
-                location_data["lat"] = location[0].raw[u'geometry']["lat"]
-                location_data["lng"] = location[0].raw[u'geometry']["lng"]
+                location_data = location[0].raw['components']
+                location_data["lat"] = location[0].raw['geometry']["lat"]
+                location_data["lng"] = location[0].raw['geometry']["lng"]
     # Direct geocoding ... from address to coordinates and full address
     if format == "direct":
         # If the query (address) is not empty
@@ -67,9 +67,9 @@ def get_location(query, format, api_key):
         else:
             location = geolocator.geocode(query)
             if location is not None:
-                location_data = location.raw[u'components']
-                location_data["lat"] = location.raw[u'geometry']["lat"]
-                location_data["lng"] = location.raw[u'geometry']["lng"]
+                location_data = location.raw['components']
+                location_data["lat"] = location.raw['geometry']["lat"]
+                location_data["lng"] = location.raw['geometry']["lng"]
 
     # Extract the meaningful data
     for component in location_data:
@@ -90,7 +90,7 @@ def get_location(query, format, api_key):
         if component == "ISO_3166-1_alpha-2":
             data["country_code"] = location_data[component]
     # The address need to be reconstructed
-    data["address_1"] = unicode(road) + " " + unicode(number)
+    data["address_1"] = str(road) + " " + str(number)
     data["latitude"] = location_data["lat"]
     data["longitude"] = location_data["lng"]
     # Format the country code to three letters

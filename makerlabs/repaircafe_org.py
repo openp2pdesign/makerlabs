@@ -9,7 +9,7 @@
 #
 
 
-from classes import Lab
+from .classes import Lab
 
 import json
 from geojson import dumps, Feature, Point, FeatureCollection
@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 
-from utils import get_location
+from .utils import get_location
 
 
 # Geocoding variable
@@ -121,7 +121,7 @@ def get_labs(format):
         column = page_source.find_all("div", class_="sc_column_item_1")
         for x in column:
             if x.string:
-                print x.string.strip()
+                print(x.string.strip())
 
         exit()
         # current_lab.address_1 = i["address_1"]
@@ -223,4 +223,4 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    print get_labs(format="json")
+    print(get_labs(format="json"))

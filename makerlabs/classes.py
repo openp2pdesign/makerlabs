@@ -38,3 +38,4 @@ class Lab(object):
         self.manager = ""
         self.founding = ""
         self.links = ""
+        

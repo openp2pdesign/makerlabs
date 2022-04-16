@@ -9,7 +9,7 @@
 #
 
 
-from classes import Lab
+from .classes import Lab
 
 import json
 from simplemediawiki import MediaWiki

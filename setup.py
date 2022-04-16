@@ -19,7 +19,7 @@ setup(
         "selenium",
         "chromedriver-installer"
     ],
-    version='0.22.0',
+    version='0.23.0',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
@@ -34,7 +34,7 @@ setup(
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ], )
