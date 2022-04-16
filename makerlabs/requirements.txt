@@ -23,7 +23,7 @@ kitchen==1.2.4
 lxml==3.7.3
 mock==2.0.0
 mwparserfromhell==0.4.3
-numpy==1.12.1
+numpy==1.21.0
 oauthlib==2.0.2
 packaging==16.8
 pandas==0.21.0
