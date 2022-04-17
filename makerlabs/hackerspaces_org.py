@@ -9,13 +9,13 @@
 #
 
 
-from .classes import Lab
-from .utils import get_location
+from classes import Lab
+from utils import get_location
 
 import json
-from simplemediawiki import MediaWiki
-import mwparserfromhell
+import requests
 import pandas as pd
+from bs4 import BeautifulSoup
 
 hackerspaces_org_api_url = "https://wiki.hackerspaces.org/w/api.php"
 
@@ -29,49 +29,92 @@ class Hackerspace(Lab):
         self.lab_type = "Hackerspace"
 
 
-def get_single_lab(lab_slug, open_cage_api_key):
+def get_single_lab(lab_slug):
     """Gets data from a single lab from hackerspaces.org."""
-    wiki = MediaWiki(hackerspaces_org_api_url)
-    wiki_response = wiki.call(
-        {'action': 'query',
-         'titles': lab_slug,
-         'prop': 'revisions',
-         'rvprop': 'content'})
 
-    # If we don't know the pageid...
-    for i in wiki_response["query"]["pages"]:
-        content = wiki_response["query"]["pages"][i]["revisions"][0]["*"]
+    # API connection setup
+    request_session = requests.Session()
+
+    # Get the first page of data
+    params = {
+        "action": "parse",
+        "page": lab_slug,
+        "prop": "text",
+        "formatversion": "2",
+        "format": "json"
+    }
+    wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
+    content = BeautifulSoup(wiki_response['parse']['text'], 'html.parser')
 
     # Transform the data into a Lab object
     current_lab = Hackerspace()
 
-    equipment_list = []
-
     # Parse the Mediawiki code
+    current_lab.name = wiki_response["parse"]["title"]
+    current_lab.id = wiki_response["parse"]["pageid"]
+    current_lab.slug = lab_slug
+    # Coordinates from the map marker
+    for div in content.find_all("div", {"class": "mapdata"}):
+        mapjavascript = json.loads(div.text)["locations"]
+        current_lab.latitude = mapjavascript[0]['lat']
+        current_lab.longitude = mapjavascript[0]['lon']
+    # Parse the side table
+    # th and td<b> are mixed...
+    for table in content.find_all('table'):
+        # th
+        for th in table.find_all('th'):
+            #if th.text.strip() == "Status":
+            #    current_lab.membercount = th.find_next('td').text.strip()
+            if th.text.strip() == "Country":
+                current_lab.country = th.find_next('td').text.strip()
+            if th.text.strip() == "State or District":
+                current_lab.state = th.find_next('td').text.strip()
+            if th.text.strip() == "City":
+                current_lab.city = th.find_next('td').text.strip()
+            if th.text.strip() == "Date of founding":
+                current_lab.created_at = th.find_next('td').text.strip()
+            if th.text.strip() == "Website":
+                current_lab.url = th.find_next('td').text.strip()
+            if th.text.strip() == "Facebook":
+                current_lab.membercount = th.find_next('td').text.strip()
+            if th.text.strip() == "Snail mail":
+                current_lab.membercount = th.find_next('td').text.strip()
+            if th.text.strip() == "Number of members":
+                current_lab.membercount = th.find_next('td').text.strip()
+            if th.text.strip() == "Membership fee":
+                current_lab.membercount = th.find_next('td').text.strip()
+        # td
+        for td in table.find_all('td'):
+            if td.text.strip() in keywords:
+                print("B",td,'---', td.find_next('td').text.strip())
+            if td.text.strip() == "Status":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Country":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "State or District":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "City":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Date of founding":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Website":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Facebook":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Snail mail":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Number of members":
+                current_lab.membercount = td.find_next('td').text.strip()
+            if td.text.strip() == "Membership fee":
+                current_lab.membercount = td.find_next('td').text.strip()
+
     wikicode = mwparserfromhell.parse(content)
     for k in wikicode.filter_templates():
         element_name = str(k.name)
         if "Hackerspace" in element_name:
             for j in k.params:
-                current_lab.name = lab_slug
-                j_value = str(j.value)
-                j_name = str(j.name)
                 # Remove new line in content
-                if j_value[-1:] == "\n" or j_value[:1] == "\n":
-                    j_value = j_value.replace('\n', '')
-                if j_name == "logo":
-                    current_lab.logo = j_value
-                if j_name == "founding":
-                    current_lab.founding = j_value
                 if j_name == "coordinate":
-                    # Clean the coordinates
-                    j_value = j_value.replace('"', '')
-                    j_value = j_value.replace('N', '')
-                    j_value = j_value.replace('S', '')
-                    j_value = j_value.replace('W', '')
-                    j_value = j_value.replace('E', '')
-                    j_value = j_value.replace('°', '')
-                    j_value = j_value.replace(' ', '')
                     # Get the full address with the coordinates
                     address = get_location(query=j_value, format="reverse", api_key=open_cage_api_key)
                     current_lab.city = address["city"]
@@ -84,77 +127,28 @@ def get_single_lab(lab_slug, open_cage_api_key):
                     current_lab.continent = address["continent"]
                     current_lab.latitude = address["latitude"]
                     current_lab.longitude = address["longitude"]
-                if j_name == "membercount":
-                    current_lab.membercount = j_value
-                if j_name == "fee":
-                    current_lab.fee = j_value
-                if j_name == "size":
-                    current_lab.size = j_value
-                if j_name == "status":
-                    current_lab.status = j_value
-                if j_name == "site":
-                    current_lab.site = j_value
-                if j_name == "wiki":
-                    current_lab.wiki = j_value
-                if j_name == "irc":
-                    current_lab.irc = j_value
-                if j_name == "jabber":
-                    current_lab.jabber = j_value
-                if j_name == "phone":
-                    current_lab.phone = j_value
-                if j_name == "youtube":
-                    current_lab.youtube = j_value
-                if j_name == "eventbrite":
-                    current_lab.eventbrite = j_value
-                if j_name == "facebook":
-                    current_lab.facebook = j_value
-                if j_name == "ustream":
-                    current_lab.ustream = j_value
-                if j_name == "flickr":
-                    current_lab.flickr = j_value
-                if j_name == "twitter":
-                    current_lab.twitter = j_value
-                if j_name == "googleplus":
-                    current_lab.googleplus = j_value
-                if j_name == "email":
-                    current_lab.email = j_value
-                if j_name == "maillist":
-                    current_lab.maillist = j_value
-                if j_name == "ical":
-                    current_lab.ical = j_value
-                if j_name == "forum":
-                    current_lab.forum = j_value
-        elif "Equipment" in element_name:
-            for j in k.params:
-                equipment_list.append(j.replace("equipment=", ""))
 
-            current_lab.equipment = equipment_list
-
-    # Load the free text
-    freetext = ""
-    for k in wikicode._nodes:
-        try:
-            test_value = k.name
-        except AttributeError:
-            freetext += str(k)
-    current_lab.text = freetext
 
     return current_lab
 
 
-def get_labs(format, open_cage_api_key):
+def get_labs(format):
     """Gets data from all labs from hackerspaces.org."""
 
     labs = []
 
+    # API connection setup
+    request_session = requests.Session()
+
     # Get the first page of data
-    wiki = MediaWiki(hackerspaces_org_api_url)
-    wiki_response = wiki.call(
-        {'action': 'query',
-         'list': 'categorymembers',
-         'cmtitle': 'Category:Hackerspace',
-         'cmlimit': '500'})
-    nextpage = wiki_response["query-continue"]["categorymembers"]["cmcontinue"]
+    params = {
+        "action": "query",
+        "cmtitle": "Category:Hackerspace",
+        "cmlimit": "500",
+        "list": "categorymembers",
+        "format": "json"
+    }
+    wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
 
     urls = []
     for i in wiki_response["query"]["categorymembers"]:
@@ -162,17 +156,20 @@ def get_labs(format, open_cage_api_key):
 
     # Load all the Labs in the first page
     for i in urls:
-        current_lab = get_single_lab(i, open_cage_api_key)
+        current_lab = get_single_lab(i)
         labs.append(current_lab)
 
     # Load all the Labs from the other pages
-    while "query-continue" in wiki_response:
-        wiki = MediaWiki(hackerspaces_org_api_url)
-        wiki_response = wiki.call({'action': 'query',
-                                   'list': 'categorymembers',
-                                   'cmtitle': 'Category:Hackerspace',
-                                   'cmlimit': '500',
-                                   "cmcontinue": nextpage})
+    while "continue" in wiki_response:
+        params = {
+            "action": "query",
+            "cmtitle": "Category:Hackerspace",
+            "cmlimit": "500",
+            "cmcontinue": wiki_response['continue']['cmcontinue'],
+            "list": "categorymembers",
+            "format": "json"
+        }
+        wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
 
         urls = []
         for i in wiki_response["query"]["categorymembers"]:
@@ -180,14 +177,8 @@ def get_labs(format, open_cage_api_key):
 
         # Load all the Labs
         for i in urls:
-            current_lab = get_single_lab(i, open_cage_api_key)
+            current_lab = get_single_lab(i)
             labs.append(current_lab)
-
-        if "query-continue" in wiki_response:
-            nextpage = wiki_response[
-                "query-continue"]["categorymembers"]["cmcontinue"]
-        else:
-            break
 
     # Transform the list into a dictionary
     labs_dict = {}
