@@ -36,6 +36,7 @@ class Lab(object):
         self.phone = ""
         self.capabilities = ""
         self.manager = ""
-        self.founding = ""
         self.links = ""
         self.created_at = ""
+        self.membercount = ""
+        self.size = ""
