@@ -9,22 +9,18 @@
 #
 
 
-from .classes import Lab
+from classes import Lab
 
 import json
 import requests
 from geojson import dumps, Feature, Point, FeatureCollection
-from geopy.geocoders import Nominatim
 import pycountry
 from time import sleep
 import pandas as pd
 
 
-# Geocoding variable
-geolocator = Nominatim()
-
 # Endpoints
-fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/0/labs.json"
+API_endpoint = "https://api.fablabs.io/0/labs.json"
 
 
 class FabLab(Lab):
@@ -35,10 +31,10 @@ class FabLab(Lab):
         self.lab_type = "Fab Lab"
 
 
-def data_from_fablabs_io(endpoint):
+def data_from_fablabs_io():
     """Gets data from fablabs.io."""
 
-    data = requests.get(endpoint).json()
+    data = requests.get(API_endpoint).json()
 
     return data
 
@@ -46,7 +42,7 @@ def data_from_fablabs_io(endpoint):
 def get_labs(format):
     """Gets Fab Lab data from fablabs.io."""
 
-    fablabs_json = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
+    fablabs_json = data_from_fablabs_io(API_endpoint)
     fablabs = {}
 
     # Load all the FabLabs
@@ -141,7 +137,7 @@ def get_labs(format):
 def labs_count():
     """Gets the number of current Fab Labs registered on fablabs.io."""
 
-    fablabs = data_from_fablabs_io(fablabs_io_labs_api_url_v0)
+    fablabs = data_from_fablabs_io()
 
     return len(fablabs["labs"])
 
