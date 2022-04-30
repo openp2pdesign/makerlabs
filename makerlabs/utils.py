@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 #
-# Fuctions for the other modules
+# Shared fuctions
 #
 # Author: Massimo Menichinelli
 # Homepage: http://www.openp2pdesign.org
@@ -51,14 +51,12 @@ def get_location(query, format, api_key):
     # Reverse geocoding ... from coordinates to address
     if format == "reverse":
         # If the query (coordinates) is not empty
-        if query is None or len(query) < 3:
+        if query is None or len(query) < 2:
             pass
         else:
             location = geolocator.reverse(query)
             if location is not None:
-                location_data = location[0].raw['components']
-                location_data["lat"] = location[0].raw['geometry']["lat"]
-                location_data["lng"] = location[0].raw['geometry']["lng"]
+                location_data = location.raw['components']
     # Direct geocoding ... from address to coordinates and full address
     if format == "direct":
         # If the query (address) is not empty
@@ -68,8 +66,6 @@ def get_location(query, format, api_key):
             location = geolocator.geocode(query)
             if location is not None:
                 location_data = location.raw['components']
-                location_data["lat"] = location.raw['geometry']["lat"]
-                location_data["lng"] = location.raw['geometry']["lng"]
 
     # Extract the meaningful data
     for component in location_data:
@@ -87,23 +83,13 @@ def get_location(query, format, api_key):
             data["county"] = location_data[component]
         if component == "state":
             data["state"] = location_data[component]
-        if component == "ISO_3166-1_alpha-2":
+        if component == "ISO_3166-1_alpha-3":
             data["country_code"] = location_data[component]
-    # The address need to be reconstructed
-    data["address_1"] = str(road) + " " + str(number)
-    data["latitude"] = location_data["lat"]
-    data["longitude"] = location_data["lng"]
-    # Format the country code to three letters
-    try:
-        data["country_code"] = pycountry.countries.get(alpha_2=data["country_code"]).alpha_3
-    except:
-        data["country_code"] = None
-    # Get the continent
-    try:
-        continent_code = pycountry.country_alpha2_to_continent_code(data["country_code"])
-        data["continent"] = pycountry.convert_continent_code_to_continent_name(continent_code)
-    except:
-        data["continent"] = None
+        if component == "continent":
+            data["continent"] = location_data[component]
+    data["address_1"] = location.raw['formatted']
+    data["latitude"] = location.raw['geometry']["lat"]
+    data["longitude"] = location.raw['geometry']["lng"]
 
     # Return the final data
     return data
