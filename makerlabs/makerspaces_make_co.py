@@ -10,6 +10,7 @@
 
 
 from classes import Lab
+from utils import get_location
 
 import json
 from urllib.request import Request, urlopen
