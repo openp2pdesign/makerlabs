@@ -10,6 +10,7 @@
 
 
 from classes import Lab
+from utils import format_labs_data
 
 import json
 import requests
@@ -98,40 +99,10 @@ def get_labs(format):
         # Add the lab to the list
         fablabs[i["slug"]] = current_lab
 
-    # Return a dictiornary / json
-    if format.lower() == "dict" or format.lower() == "json":
-        output = {}
-        for j in fablabs:
-            output[j] = fablabs[j].__dict__
-    # Return a geojson
-    elif format.lower() == "geojson" or format.lower() == "geo":
-        labs_list = []
-        for l in fablabs:
-            single = fablabs[l].__dict__
-            single_lab = Feature(
-                type="Feature",
-                geometry=Point((single["latitude"], single["longitude"])),
-                properties=single)
-            labs_list.append(single_lab)
-        output = dumps(FeatureCollection(labs_list))
-    # Return a Pandas DataFrame
-    elif format.lower() == "pandas" or format.lower() == "dataframe":
-        output = {}
-        for j in fablabs:
-            output[j] = fablabs[j].__dict__
-        # Transform the dict into a Pandas DataFrame
-        output = pd.DataFrame.from_dict(output)
-        output = output.transpose()
-    # Return an object
-    elif format.lower() == "object" or format.lower() == "obj":
-        output = fablabs
-    # Default: return an oject
-    else:
-        output = fablabs
-    # Return a proper json
-    if format.lower() == "json":
-        output = json.dumps(output)
-    return output
+    # Return formatted data
+    data = format_labs_data(format=format, labs=fablabs)
+
+    return data
 
 
 def labs_count():
@@ -139,7 +110,7 @@ def labs_count():
 
     fablabs = data_from_fablabs_io()
 
-    return len(fablabs["labs"])
+    return len(fablabs)
 
 
 if __name__ == "__main__":

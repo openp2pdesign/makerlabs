@@ -15,6 +15,44 @@ from time import sleep
 import pycountry
 
 
+def format_labs_data(format, labs):
+    # Return a dictionary / json
+    if format.lower() == "dict" or format.lower() == "json":
+        output = {}
+        for j in labs:
+            output[j] = labs[j].__dict__
+    # Return a geojson
+    elif format.lower() == "geojson" or format.lower() == "geo":
+        labs_list = []
+        for l in labs:
+            single = labs[l].__dict__
+            single_lab = Feature(
+                type="Feature",
+                geometry=Point((single["latitude"], single["longitude"])),
+                properties=single)
+            labs_list.append(single_lab)
+        output = dumps(FeatureCollection(labs_list))
+    # Return a Pandas DataFrame
+    elif format.lower() == "pandas" or format.lower() == "dataframe":
+        output = {}
+        for j in labs:
+            output[j] = labs[j].__dict__
+        # Transform the dict into a Pandas DataFrame
+        output = pd.DataFrame.from_dict(output)
+        output = output.transpose()
+    # Return an object
+    elif format.lower() == "object" or format.lower() == "obj":
+        output = labs
+    # Default: return an oject
+    else:
+        output = labs
+    # Return a proper json
+    if format.lower() == "json":
+        output = json.dumps(output)
+
+    return output
+
+
 def get_location(query, format, api_key):
     """Get geographic data of a lab in a coherent way for all labs."""
 

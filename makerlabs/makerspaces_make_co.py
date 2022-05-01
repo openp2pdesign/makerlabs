@@ -11,11 +11,11 @@
 
 from classes import Lab
 from utils import get_location
+from utils import format_labs_data
 
 import json
 from urllib.request import Request, urlopen
 from geojson import dumps, Feature, Point, FeatureCollection
-from time import sleep
 import pandas as pd
 
 
@@ -83,40 +83,10 @@ def get_labs(format, open_cage_api_key):
         # Add the lab to the list
         makerspaces[i["mmap_eventname"]] = current_lab
 
-    # Return a dictiornary / json
-    if format.lower() == "dict" or format.lower() == "json":
-        output = {}
-        for j in makerspaces:
-            output[j] = makerspaces[j].__dict__
-    # Return a geojson
-    elif format.lower() == "geojson" or format.lower() == "geo":
-        labs_list = []
-        for l in makerspaces:
-            single = makerspaces[l].__dict__
-            single_lab = Feature(
-                type="Feature",
-                geometry=Point((single["latitude"], single["longitude"])),
-                properties=single)
-            labs_list.append(single_lab)
-        output = dumps(FeatureCollection(labs_list))
-    # Return a Pandas DataFrame
-    elif format.lower() == "pandas" or format.lower() == "dataframe":
-        output = {}
-        for j in makerspaces:
-            output[j] = makerspaces[j].__dict__
-        # Transform the dict into a Pandas DataFrame
-        output = pd.DataFrame.from_dict(output)
-        output = output.transpose()
-    # Return an object
-    elif format.lower() == "object" or format.lower() == "obj":
-        output = makerspaces
-    # Default: return an oject
-    else:
-        output = makerspaces
-    # Return a proper json
-    if format.lower() == "json":
-        output = json.dumps(output)
-    return output
+    # Return formatted data
+    data = format_labs_data(format=format, labs=makerspaces)
+
+    return data
 
 
 def labs_count():

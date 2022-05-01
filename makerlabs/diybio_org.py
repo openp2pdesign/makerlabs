@@ -11,6 +11,7 @@
 
 from classes import Lab
 from utils import get_location
+from utils import format_labs_data
 
 import json
 from bs4 import BeautifulSoup
@@ -143,41 +144,10 @@ def get_labs(format, open_cage_api_key):
                 diybiolabs[slug] = current_lab
                 del current_lab
 
-    # Return a dictionary / json
-    if format.lower() == "dict":
-        output = {}
-        for j in diybiolabs:
-            output[j] = diybiolabs[j].__dict__
-    # Return a geojson
-    elif format.lower() == "geojson" or format.lower() == "geo":
-        labs_list = []
-        for l in diybiolabs:
-            single = diybiolabs[l].__dict__
-            single_lab = Feature(
-                type="Feature",
-                geometry=Point((single["latitude"], single["longitude"])),
-                properties=single)
-            labs_list.append(single_lab)
-        output = dumps(FeatureCollection(labs_list))
-    # Return a Pandas DataFrame
-    elif format.lower() == "pandas" or format.lower() == "dataframe":
-        output = {}
-        for j in diybiolabs:
-            output[j] = diybiolabs[j].__dict__
-        # Transform the dict into a Pandas DataFrame
-        output = pd.DataFrame.from_dict(output)
-        # Put labs names as the index, to make it coherent with other APIs
-        output = output.transpose()
-    # Return an object
-    elif format.lower() == "object" or format.lower() == "obj":
-        output = diybiolabs
-    # Default: return an oject
-    else:
-        output = diybiolabs
-    # Return a proper json
-    if format.lower() == "json":
-        output = json.dumps(diybiolabs)
-    return output
+    # Return formatted data
+    data = format_labs_data(format=format, labs=diybiolabs)
+
+    return data
 
 
 def labs_count():
