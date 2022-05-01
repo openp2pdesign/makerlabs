@@ -11,13 +11,15 @@
 
 from classes import Lab
 from utils import get_location
+from utils import format_labs_data
 
 import json
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 
-hackerspaces_org_api_url = "https://wiki.hackerspaces.org/w/api.php"
+# Endpoints
+API_endpoint = "https://wiki.hackerspaces.org/w/api.php"
 
 
 class Hackerspace(Lab):
@@ -29,7 +31,42 @@ class Hackerspace(Lab):
         self.lab_type = "Hackerspace"
 
 
-def get_single_lab(lab_slug):
+def data_from_hackerspaces_org():
+    """Gets data from hackerspaces.org."""
+
+    hackerspaces = []
+    req = requests.Session()
+    # Get first 500 labs
+    params = {
+        "action": "query",
+        "cmtitle": "Category:Hackerspace",
+        "cmlimit": "500",
+        "list": "categorymembers",
+        "format": "json"
+    }
+    request_data = req.get(url=API_endpoint, params=params).json()
+    for page in request_data['query']['categorymembers']:
+        hackerspaces.append(page['title'])
+    # Get next labs
+    while "continue" in request_data:
+        params = {
+            "action": "query",
+            "cmtitle": "Category:Hackerspace",
+            "cmlimit": "500",
+            "cmcontinue": request_data['continue']['cmcontinue'],
+            "list": "categorymembers",
+            "format": "json"
+        }
+        req = requests.Session()
+        request_data = req.get(url=API_endpoint, params=params).json()
+        for page in request_data['query']['categorymembers']:
+            hackerspaces.append(page['title'])
+
+
+    return hackerspaces
+
+
+def get_single_lab(lab_slug, open_cage_api_key):
     """Gets data from a single lab from hackerspaces.org."""
 
     # API connection setup
@@ -43,7 +80,7 @@ def get_single_lab(lab_slug):
         "formatversion": "2",
         "format": "json"
     }
-    wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
+    wiki_response = request_session.get(url=API_endpoint, params=params).json()
     content = BeautifulSoup(wiki_response['parse']['text'], 'html.parser')
 
     # Transform the data into a Lab object
@@ -58,6 +95,7 @@ def get_single_lab(lab_slug):
         mapjavascript = json.loads(div.text)["locations"]
         current_lab.latitude = mapjavascript[0]['lat']
         current_lab.longitude = mapjavascript[0]['lon']
+
     # Parse the side table
     # th and td<b> are mixed...
     for table in content.find_all('table'):
@@ -108,25 +146,31 @@ def get_single_lab(lab_slug):
             if td.text.strip() == "Membership fee":
                 current_lab.membercount = td.find_next('td').text.strip()
 
-    wikicode = mwparserfromhell.parse(content)
-    for k in wikicode.filter_templates():
-        element_name = str(k.name)
-        if "Hackerspace" in element_name:
-            for j in k.params:
-                # Remove new line in content
-                if j_name == "coordinate":
-                    # Get the full address with the coordinates
-                    address = get_location(query=j_value, format="reverse", api_key=open_cage_api_key)
-                    current_lab.city = address["city"]
-                    current_lab.county = address["county"]
-                    current_lab.state = address["state"]
-                    current_lab.postal_code = address["postal_code"]
-                    current_lab.address_1 = address["address_1"]
-                    current_lab.country = address["country"]
-                    current_lab.country_code = address["country_code"]
-                    current_lab.continent = address["continent"]
-                    current_lab.latitude = address["latitude"]
-                    current_lab.longitude = address["longitude"]
+    # TODO
+    # Find Facebook and Twitter links, add also the other ones
+    current_lab.links = {"facebook": "", "twitter": ""}
+    for link in i["links"]:
+        if "facebook" in link["url"]:
+            current_lab.links["facebook"] = link["url"]
+        elif "twitter" in link["url"]:
+            current_lab.links["twitter"] = link["url"]
+        else:
+            current_lab.links[link["id"]] = link["url"]
+
+    # TODO
+        if j_name == "coordinate":
+            # Get the full address with the coordinates
+            address = get_location(query=j_value, format="reverse", api_key=open_cage_api_key)
+            current_lab.city = address["city"]
+            current_lab.county = address["county"]
+            current_lab.state = address["state"]
+            current_lab.postal_code = address["postal_code"]
+            current_lab.address_1 = address["address_1"]
+            current_lab.country = address["country"]
+            current_lab.country_code = address["country_code"]
+            current_lab.continent = address["continent"]
+            current_lab.latitude = address["latitude"]
+            current_lab.longitude = address["longitude"]
 
 
     return current_lab
@@ -148,7 +192,7 @@ def get_labs(format):
         "list": "categorymembers",
         "format": "json"
     }
-    wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
+    wiki_response = request_session.get(url=API_endpoint, params=params).json()
 
     urls = []
     for i in wiki_response["query"]["categorymembers"]:
@@ -156,7 +200,7 @@ def get_labs(format):
 
     # Load all the Labs in the first page
     for i in urls:
-        current_lab = get_single_lab(i)
+        current_lab = get_single_lab(i, open_cage_api_key)
         labs.append(current_lab)
 
     # Load all the Labs from the other pages
@@ -169,7 +213,7 @@ def get_labs(format):
             "list": "categorymembers",
             "format": "json"
         }
-        wiki_response = request_session.get(url=hackerspaces_org_api_url, params=params).json()
+        wiki_response = request_session.get(url=API_endpoint, params=params).json()
 
         urls = []
         for i in wiki_response["query"]["categorymembers"]:
@@ -185,37 +229,10 @@ def get_labs(format):
     for j, k in enumerate(labs):
         labs_dict[j] = k.__dict__
 
-    # Return a dictiornary / json
-    if format.lower() == "dict" or format.lower() == "json":
-        output = labs_dict
-    # Return a geojson
-    elif format.lower() == "geojson" or format.lower() == "geo":
-        labs_list = []
-        for l in labs_dict:
-            single = labs_dict[l].__dict__
-            single_lab = Feature(
-                type="Feature",
-                geometry=Point((single["latitude"], single["longitude"])),
-                properties=single)
-            labs_list.append(single_lab)
-        output = dumps(FeatureCollection(labs_list))
-    # Return a Pandas DataFrame
-    elif format.lower() == "pandas" or format.lower() == "dataframe":
-        output = labs_dict
-        # Transform the dict into a Pandas DataFrame
-        output = pd.DataFrame.from_dict(output)
-        output = output.transpose()
-        output = output.set_index(['name'])
-    # Return an object
-    elif format.lower() == "object" or format.lower() == "obj":
-        output = labs
-    # Default: return an object
-    else:
-        output = labs
-    # Return a proper json
-    if format.lower() == "json":
-        output = json.dumps(labs_dict)
-    return output
+    # Return formatted data
+    data = format_labs_data(format=format, labs=labs)
+
+    return data
 
 
 def labs_count():
@@ -227,4 +244,6 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    pass
+    #pass
+    a = data_from_hackerspaces_org()
+    print(a)
