@@ -6,8 +6,6 @@ setup(
     install_requires=[
         "kitchen",
         "requests",
-        "mwparserfromhell",
-        "simplemediawiki",
         "wsgiref",
         "geojson",
         "geopy",
@@ -15,9 +13,7 @@ setup(
         "lxml",
         "pandas",
         "us",
-        "pycountry",
-        "selenium",
-        "chromedriver-installer"
+        "pycountry"
     ],
     version='0.23.0',
     description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
@@ -25,7 +21,7 @@ setup(
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
     download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.21.2',
-    keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'TechShop',
+    keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'Repair Cafes',
               'Makers'],
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -35,6 +31,5 @@ setup(
         "Intended Audience :: Science/Research",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 2",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ], )
