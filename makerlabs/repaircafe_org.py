@@ -9,28 +9,20 @@
 #
 
 
-from .classes import Lab
+from classes import Lab
+from utils import get_location
 
 import json
-from geojson import dumps, Feature, Point, FeatureCollection
-from geopy.geocoders import Nominatim
-import pycountry
-from pycountry_convert import country_alpha2_to_continent_code
-from time import sleep
-from selenium import webdriver
-from bs4 import BeautifulSoup
 import requests
+import re
+from geojson import dumps, Feature, Point, FeatureCollection
+from time import sleep
+from bs4 import BeautifulSoup
 import pandas as pd
 
-from .utils import get_location
-
-
-# Geocoding variable
-geolocator = Nominatim()
 
 # Endpoints
-fablabs_io_labs_api_url_v0 = "https://api.fablabs.io/v0/labs.json"
-fablabs_io_projects_api_url_v0 = "https://api.fablabs.io/v0/projects.json"
+API_endpoint = "https://www.repaircafe.org/en/wp-json/wp/v2/pages/165"
 
 
 class RepairCafe(Lab):
@@ -44,42 +36,82 @@ class RepairCafe(Lab):
 def data_from_repaircafe_org():
     """Gets data from repaircafe_org."""
 
-    # Use Chrome as a browser
-    browser = webdriver.Chrome()
-    # Use PhantomJS as a browser
-    # browser = webdriver.PhantomJS('phantomjs')
-    browser.get("https://repaircafe.org/en/?s=Contact+the+local+organisers")
-    browser.maximize_window()
-
-    # Iterate over results (the #viewmore_link button)
-    viewmore_button = True
-    while viewmore_button:
-        try:
-            viewmore = browser.find_element_by_id("viewmore_link")
-            # Scroll to the link in order to make it visible
-            browser.execute_script("arguments[0].scrollIntoView();", viewmore)
-            # Keep searching
-            viewmore.click()
-        except:
-            # If there's an error, we have reached the end of the search
-            viewmore_button = False
-        # Give a bit of time for loading the search results
-        sleep(2)
-
-    # Load the source code
-    page_source = BeautifulSoup(browser.page_source, "lxml")
-    # Close the browser
-    browser.quit()
-    # Parse the source code in order to find all the links under H4s
-    data = []
-    for h4 in page_source.find_all("h4"):
-        for a in h4.find_all('a', href=True):
-            data.append({"name": a.contents[0], "url": a['href']})
+    req = requests.get(API_endpoint).json()
+    rendered = req["content"]["rendered"]
+    soup = BeautifulSoup(rendered, 'lxml')
+    scripts = soup.find_all('script')
+    # Get locations
+    pattern = re.compile('.*var locations = (.*?);.*', re.DOTALL)
+    locations = []
+    for script in scripts:
+        script2 = script.string
+        script2.replace("&amp;", "&")
+        script2.replace("\u00e9", "é")
+        data = pattern.match(str(script2.string))
+        if data:
+            locations = data.groups()[0]
+    # Get titles
+    pattern2 = re.compile('.*var titles = (.*?);.*', re.DOTALL)
+    titles = []
+    for script in scripts:
+        script2 = str(script.string)
+        script2 = script2.replace("&amp;", "&")
+        data = pattern2.match(script2)
+        if data:
+            titles = data.groups()[0]
+    # Get markers_content
+    pattern3 = re.compile('.*var markers_content = (.*?)var poi.*', re.DOTALL)
+    markers_content = []
+    for script in scripts:
+        script2 = str(script.string)
+        script2 = script2.replace("&amp;", "&")
+        data = pattern3.match(script2)
+        if data:
+            markers_content = data.groups()[0]
+    markers_content = markers_content.replace("];", "]")
+    # Load the gathered data
+    locations_data = json.loads(locations)
+    titles_data = json.loads(titles)
+    markers_content_data = json.loads(markers_content)
+    # Organize data of each lab
+    data = {}
+    for k,i in enumerate(titles_data):
+        soupj = BeautifulSoup(markers_content_data[k], "lxml")
+        pa = soupj.find_all('a', href=True)
+        for a in pa:
+            ja = a['href']
+        ps = soupj.find_all('p')
+        for s in ps:
+            js = re.sub(r'\s', ' ', s.getText())
+            js = js.replace('    ', ' ')
+            js = js.replace('  ', '')
+            js = js[1:]
+        data[i] = {"title": i, 'location': locations_data[k], 'slug': ja, 'Address': js}
+    # Query data of each lab
+    for i in data:
+        lab_req = requests.get(data[i]["slug"])
+        soup = BeautifulSoup(lab_req.text, "lxml")
+        # Get website url
+        cy = soup.select('.field_website .data a')
+        for c in cy:
+            data[i]["url"] = c["href"]
+        # Get Twitter url
+        cy = soup.select('.field_twitter .data a')
+        for c in cy:
+            data[i]["twitter"] = c["href"]
+        # Get Facebook url
+        cy = soup.select('.field_facebook .data a')
+        for c in cy:
+            data[i]["facebook"] = c["href"]
+        # Get description
+        cy = soup.select('.field_informatie .data p')
+        for c in cy:
+            data[i]["description"] = c.text
 
     return data
 
 
-def get_labs(format):
+def get_labs(format, open_cage_api_key):
     """Gets Repair Cafe data from repairecafe.org."""
 
     data = data_from_repaircafe_org()
@@ -88,96 +120,16 @@ def get_labs(format):
 
     # Load all the Repair Cafes
     for i in data:
+        print(i)
+        exit()
         # Create a lab
         current_lab = RepairCafe()
         # Add existing data from first scraping
         current_lab.name = i["name"]
-        slug = i["url"].replace("https://repaircafe.org/locations/", "")
-        if slug.endswith("/"):
-            slug.replace("/", "")
-        current_lab.slug = slug
-        current_lab.url = i["url"]
-        # Scrape for more data
-        page_request = requests.get(i["url"])
-        if page_request.status_code == 200:
-            page_source = BeautifulSoup(page_request.text, "lxml")
-        else:
-            output = "There was an error while accessing data on repaircafe.org."
-
-        # Find Facebook and Twitter links, add also the other ones
-        current_lab.links = {"facebook": "", "twitter": ""}
-        column = page_source.find_all("div", class_="sc_column_item_2")
-        for j in column:
-            for p in j.find_all('p'):
-                for a in p.find_all('a', href=True):
-                    if "facebook" in a['href']:
-                        current_lab.links["facebook"] = a['href']
-                    elif "twitter" in a['href']:
-                        current_lab.links["twitter"] = a['href']
-                    else:
-                        current_lab.links[a['href']] = a['href']
-
-        # Find address
-        column = page_source.find_all("div", class_="sc_column_item_1")
-        for x in column:
-            if x.string:
-                print(x.string.strip())
-
-        exit()
-        # current_lab.address_1 = i["address_1"]
-        # current_lab.address_2 = i["address_2"]
-        # current_lab.address_notes = i["address_notes"]
-        # current_lab.blurb = i["blurb"]
-        # current_lab.city = i["city"]
-        # current_lab.country_code = i["country_code"]
-        # current_lab.county = i["county"]
-        # current_lab.description = i["description"]
-        # current_lab.email = i["email"]
-        # current_lab.id = i["id"]
-        # current_lab.phone = i["phone"]
-        # current_lab.postal_code = i["postal_code"]
-        #
-        #
-        # current_lab.continent = country_alpha2_to_continent_code(i[
-        #     "country_code"].upper())
-        # current_country = pycountry.countries.get(
-        #     alpha_2=i["country_code"].upper())
-        # current_lab.country_code = current_country.alpha_3
-        # current_lab.country = current_country.name
-
-        # if i["longitude"] is None or i["latitude"] is None:
-        #     # Be nice with the geocoder API limit
-        #     errorsb += 1
-        #     # sleep(10)
-        #     # location = geolocator.geocode(
-        #     #     {"city": i["city"],
-        #     #      "country": i["country_code"].upper()},
-        #     #     addressdetails=True,
-        #     #     language="en")
-        #     # if location is not None:
-        #     #     current_lab.latitude = location.latitude
-        #     #     current_lab.longitude = location.longitude
-        #     #     if "county" in location.raw["address"]:
-        #     #         current_lab.county = location.raw["address"][
-        #     #             "county"].encode('utf-8')
-        #     #     if "state" in location.raw["address"]:
-        #     #         current_lab.state = location.raw["address"][
-        #     #             "state"].encode('utf-8')
-        # else:
-        #     # Be nice with the geocoder API limit
-        #     sleep(10)
-        #     errorsa += 1
-        #     # location = geolocator.reverse((i["latitude"], i["longitude"]))
-        #     # if location is not None:
-        #     #     if "county" in location.raw["address"]:
-        #     #         current_lab.county = location.raw["address"][
-        #     #             "county"].encode('utf-8')
-        #     #     if "state" in location.raw["address"]:
-        #     #         current_lab.state = location.raw["address"][
-        #     #             "state"].encode('utf-8')
 
         # Add the lab to the list
         repaircafes[slug] = current_lab
+
     # Return a dictiornary / json
     if format.lower() == "dict" or format.lower() == "json":
         output = {}
@@ -217,10 +169,26 @@ def get_labs(format):
 def labs_count():
     """Gets the number of current Repair Cafes registered on repaircafe.org."""
 
-    repaircafes = data_from_repaircafe_org()
+    # Request directly the number of labs as the full data takes time
+    req = requests.get(API_endpoint).json()
+    rendered = req["content"]["rendered"]
+    soup = BeautifulSoup(rendered, 'lxml')
+    scripts = soup.find_all('script')
+    # Get titles
+    pattern2 = re.compile('.*var titles = (.*?);.*', re.DOTALL)
+    titles = []
+    for script in scripts:
+        script2 = str(script.string)
+        script2 = script2.replace("&amp;", "&")
+        data = pattern2.match(script2)
+        if data:
+            titles = data.groups()[0]
 
-    return len(repaircafes["labs"])
+    repaircafes = json.loads(titles)
+
+    return len(repaircafes)
 
 
 if __name__ == "__main__":
-    print(get_labs(format="json"))
+    a = labs_count()
+    print(a)
