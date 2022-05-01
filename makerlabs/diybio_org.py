@@ -9,8 +9,8 @@
 #
 
 
-from .classes import Lab
-from .utils import get_location
+from classes import Lab
+from utils import get_location
 
 import json
 from bs4 import BeautifulSoup
@@ -20,7 +20,11 @@ import us
 import pandas as pd
 
 # Endpoints
-diy_bio_labs_url = "https://diybio.org/local/"
+API_endpoint = "https://diybio.org/local/"
+# Plan moving to DIYbiosphere
+#https://sphere.diybio.org/
+#https://sphere.diybio.org/browse/?q=&idx=diybiosphere&p=0&dFR%5Bcollection%5D%5B0%5D=labs
+#https://github.com/DIYbiosphere/sphere
 
 
 class DiyBioLab(Lab):
@@ -34,7 +38,7 @@ class DiyBioLab(Lab):
 def data_from_diybio_org():
     """Scrapes data from diybio.org."""
 
-    r = requests.get(diy_bio_labs_url)
+    r = requests.get(API_endpoint)
 
     if r.status_code == 200:
         # Fix a problem in the html source while loading it
@@ -179,7 +183,7 @@ def get_labs(format, open_cage_api_key):
 def labs_count():
     """Gets the number of current DIYBio Labs listed on diybio.org."""
 
-    diybiolabs = get_labs("object")
+    diybiolabs = get_labs()
 
     return len(diybiolabs)
 
