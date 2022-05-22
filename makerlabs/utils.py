@@ -13,6 +13,7 @@
 from geopy.geocoders import OpenCage
 from time import sleep
 import pycountry
+import json
 
 
 def format_labs_data(format, labs):
