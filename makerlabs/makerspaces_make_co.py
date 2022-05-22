@@ -45,11 +45,11 @@ def data_from_makerspaces_make_co():
 def get_labs(format, open_cage_api_key):
     """Gets Makerspace data from makerspaces.make.co."""
 
-    makerspaces_json = data_from_makerspaces_make_co(API_endpoint)
+    makerspaces_json = data_from_makerspaces_make_co()
     makerspaces = {}
 
     # Load all the Makerspaces
-    for i in makerspaces_json["labs"]:
+    for i in makerspaces_json:
         current_lab = Makerspace()
         current_lab.name = i["mmap_eventname"]
         current_lab.url = i["mmap_url"]
