@@ -42,33 +42,33 @@ def data_from_repaircafe_org():
     soup = BeautifulSoup(rendered, 'lxml')
     scripts = soup.find_all('script')
     # Get locations
-    pattern = re.compile('.*var locations = (.*?);.*', re.DOTALL)
+    patternLocation = re.compile('.*var locations = (.*?);.*', re.DOTALL)
     locations = []
     for script in scripts:
-        script2 = script.string
-        script2.replace("&amp;", "&")
-        script2.replace("\u00e9", "é")
-        data = pattern.match(str(script2.string))
-        if data:
-            locations = data.groups()[0]
+        scriptLocation = script.string
+        scriptLocation = scriptLocation.replace("&amp;", "&")
+        scriptLocation = scriptLocation.replace("\u00e9", "é")
+        dataLocation = patternLocation.match(str(scriptLocation))
+        if dataLocation:
+            locations = dataLocation.groups()[0]
     # Get titles
-    pattern2 = re.compile('.*var titles = (.*?);.*', re.DOTALL)
+    patternTitles = re.compile('.*var titles = (.*?);.*', re.DOTALL)
     titles = []
     for script in scripts:
-        script2 = str(script.string)
-        script2 = script2.replace("&amp;", "&")
-        data = pattern2.match(script2)
-        if data:
-            titles = data.groups()[0]
+        scriptTitle = str(script.string)
+        scriptTitle = scriptTitle.replace("&amp;", "&")
+        dataTitle = patternTitles.match(scriptTitle)
+        if dataTitle:
+            titles = dataTitle.groups()[0]
     # Get markers_content
-    pattern3 = re.compile('.*var markers_content = (.*?)var poi.*', re.DOTALL)
+    patternMarkers = re.compile('.*var markers_content = (.*?)var poi.*', re.DOTALL)
     markers_content = []
     for script in scripts:
-        script2 = str(script.string)
-        script2 = script2.replace("&amp;", "&")
-        data = pattern3.match(script2)
-        if data:
-            markers_content = data.groups()[0]
+        scriptMarker = str(script.string)
+        scriptMarker = scriptMarker.replace("&amp;", "&")
+        dataMarker = patternMarkers.match(scriptMarker)
+        if dataMarker:
+            markers_content = dataMarker.groups()[0]
     markers_content = markers_content.replace("];", "]")
     # Load the gathered data
     locations_data = json.loads(locations)
@@ -115,18 +115,50 @@ def data_from_repaircafe_org():
 def get_labs(format, open_cage_api_key):
     """Gets Repair Cafe data from repairecafe.org."""
 
-    data = data_from_repaircafe_org()
-
+    repaircafes_json = data_from_repaircafe_org()
     repaircafes = {}
 
     # Load all the Repair Cafes
-    for i in data:
-        print(i)
-        exit()
-        # Create a lab
+    for i in repaircafes_json:
         current_lab = RepairCafe()
-        # Add existing data from first scraping
-        current_lab.name = i["name"]
+        current_lab.name = repaircafes_json[i]["title"]
+        current_lab.slug = repaircafes_json[i]["slug"]
+        current_lab.description = repaircafes_json[i]["description"]
+        current_lab.address_1 = repaircafes_json[i]["Address"]
+        if "url" in repaircafes_json[i]:
+            current_lab.url = repaircafes_json[i]["url"]
+
+        # Find Facebook and Twitter links, add also the other ones
+        current_lab.links = {"facebook": "", "twitter": ""}
+        if "facebook" in repaircafes_json[i]:
+            current_lab.links["facebook"] = repaircafes_json[i]["facebook"]
+        elif "twitter" in repaircafes_json[i]:
+            current_lab.links["twitter"] = repaircafes_json[i]["twitter"]
+
+        # Check coordinates
+        if repaircafes_json[i]["location"][0] is not None:
+            current_lab.longitude = repaircafes_json[i]["location"][0]
+        else:
+            current_lab.longitude = 0.0
+        if repaircafes_json[i]["location"][1] is not None:
+            current_lab.latitude = repaircafes_json[i]["location"][1]
+        else:
+            current_lab.latitude = 0.0
+
+        # Get address from coordinates
+        location = get_location(query=(
+            current_lab.latitude,
+            current_lab.longitude),
+            format="reverse",
+            api_key=open_cage_api_key)
+
+        current_lab.city = location["city"]
+        current_lab.country_code = location["country_code"]
+        current_lab.country = location["country"]
+        current_lab.county = location["county"]
+        current_lab.postal_code = location["postal_code"]
+        current_lab.continent = location["continent"]
+        current_lab.state = location["state"]
 
         # Add the lab to the list
         repaircafes[slug] = current_lab
@@ -161,5 +193,4 @@ def labs_count():
 
 
 if __name__ == "__main__":
-    a = labs_count()
-    print(a)
+    pass
