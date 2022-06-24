@@ -44,7 +44,7 @@ def get_labs(format):
     """Gets Fab Lab data from fablabs.io."""
 
     fablabs_json = data_from_fablabs_io(API_endpoint)
-    fablabs = {}
+    labs = {}
 
     # Load all the FabLabs
     for i in fablabs_json["labs"]:
@@ -97,10 +97,10 @@ def get_labs(format):
                 current_lab.links[link["id"]] = link["url"]
 
         # Add the lab to the list
-        fablabs[i["slug"]] = current_lab
+        labs[i["slug"]] = current_lab
 
     # Return formatted data
-    data = format_labs_data(format=format, labs=fablabs)
+    data = format_labs_data(format=format, labs=labs)
 
     return data
 
