@@ -40,6 +40,7 @@ class Lab(object):
         self.created_at = ""
         self.membercount = ""
         self.size = ""
+        self.status = ""
 
 
 class Faire(object):
