@@ -17,6 +17,7 @@ import json
 import requests
 import re
 from geojson import dumps, Feature, Point, FeatureCollection
+import random
 from time import sleep
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -24,6 +25,21 @@ import pandas as pd
 
 # Endpoints
 API_endpoint = "https://www.repaircafe.org/en/wp-json/wp/v2/pages/165"
+# Header
+header_content = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "Dnt": "1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36",
+}
+# User-Agent options
+user_agent_list = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+]
 
 
 class RepairCafe(Lab):
@@ -37,7 +53,9 @@ class RepairCafe(Lab):
 def data_from_repaircafe_org():
     """Gets data from repaircafe_org."""
 
-    req = requests.get(API_endpoint).json()
+    headers = requests.utils.default_headers()
+    headers.update(header_content)
+    req = requests.get(API_endpoint, headers=headers).json()
     rendered = req["content"]["rendered"]
     soup = BeautifulSoup(rendered, 'lxml')
     scripts = soup.find_all('script')
@@ -61,7 +79,8 @@ def data_from_repaircafe_org():
         if dataTitle:
             titles = dataTitle.groups()[0]
     # Get markers_content
-    patternMarkers = re.compile('.*var markers_content = (.*?)var poi.*', re.DOTALL)
+    patternMarkers = re.compile(
+        '.*var markers_content = (.*?)var poi.*', re.DOTALL)
     markers_content = []
     for script in scripts:
         scriptMarker = str(script.string)
@@ -76,7 +95,7 @@ def data_from_repaircafe_org():
     markers_content_data = json.loads(markers_content)
     # Organize data of each lab
     data = {}
-    for k,i in enumerate(titles_data):
+    for k, i in enumerate(titles_data):
         soupj = BeautifulSoup(markers_content_data[k], "lxml")
         pa = soupj.find_all('a', href=True)
         for a in pa:
@@ -87,10 +106,14 @@ def data_from_repaircafe_org():
             js = js.replace('    ', ' ')
             js = js.replace('  ', '')
             js = js[1:]
-        data[i] = {"title": i, 'location': locations_data[k], 'slug': ja, 'Address': js}
+        data[i] = {"title": i, 'location': locations_data[k],
+                   'slug': ja, 'Address': js}
     # Query data of each lab
     for i in data:
-        lab_req = requests.get(data[i]["slug"])
+        headers = requests.utils.default_headers()
+        headers.update(header_content)
+        headers = {'User-Agent': random.choice(user_agent_list)}
+        lab_req = requests.get(data[i]["slug"], headers=headers)
         soup = BeautifulSoup(lab_req.text, "lxml")
         # Get website url
         cy = soup.select('.field_website .data a')
@@ -108,6 +131,7 @@ def data_from_repaircafe_org():
         cy = soup.select('.field_informatie .data p')
         for c in cy:
             data[i]["description"] = c.text
+        sleep(random.randint(1, 40))
 
     return data
 
@@ -117,14 +141,18 @@ def get_labs(format, open_cage_api_key):
 
     repaircafes_json = data_from_repaircafe_org()
     repaircafes = {}
+    print(repaircafes_json)
 
     # Load all the Repair Cafes
     for i in repaircafes_json:
         current_lab = RepairCafe()
+        print(current_lab.name)
         current_lab.name = repaircafes_json[i]["title"]
         current_lab.slug = repaircafes_json[i]["slug"]
-        current_lab.description = repaircafes_json[i]["description"]
-        current_lab.address_1 = repaircafes_json[i]["Address"]
+        if "Address" in repaircafes_json[i]:
+            current_lab.address_1 = repaircafes_json[i]["Address"]
+        if "description" in repaircafes_json[i]:
+            current_lab.description = repaircafes_json[i]["description"]
         if "url" in repaircafes_json[i]:
             current_lab.url = repaircafes_json[i]["url"]
 
@@ -138,10 +166,13 @@ def get_labs(format, open_cage_api_key):
         # Check coordinates
         if repaircafes_json[i]["location"][0] is not None:
             current_lab.longitude = repaircafes_json[i]["location"][0]
+            print(repaircafes_json[i]["location"])
         else:
             current_lab.longitude = 0.0
         if repaircafes_json[i]["location"][1] is not None:
             current_lab.latitude = repaircafes_json[i]["location"][1]
+            print(repaircafes_json[i]["location"])
+            print()
         else:
             current_lab.latitude = 0.0
 
@@ -161,7 +192,7 @@ def get_labs(format, open_cage_api_key):
         current_lab.state = location["state"]
 
         # Add the lab to the list
-        repaircafes[slug] = current_lab
+        repaircafes[repaircafes_json[i]["slug"]] = current_lab
 
     # Return formatted data
     data = format_labs_data(format=format, labs=repaircafes)
@@ -173,7 +204,10 @@ def labs_count():
     """Gets the number of current Repair Cafes registered on repaircafe.org."""
 
     # Request directly the number of labs as the full data takes time
-    req = requests.get(API_endpoint).json()
+    headers = requests.utils.default_headers()
+    headers.update(header_content)
+    headers = {'User-Agent': random.choice(user_agent_list)}
+    req = requests.get(API_endpoint, headers=headers).json()
     rendered = req["content"]["rendered"]
     soup = BeautifulSoup(rendered, 'lxml')
     scripts = soup.find_all('script')
