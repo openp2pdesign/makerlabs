@@ -15,7 +15,6 @@ from utils import format_labs_data
 
 import json
 from urllib.request import Request, urlopen
-from geojson import dumps, Feature, Point, FeatureCollection
 import pandas as pd
 
 

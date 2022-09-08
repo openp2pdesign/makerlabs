@@ -14,7 +14,6 @@ from utils import format_labs_data
 
 import json
 import requests
-from geojson import dumps, Feature, Point, FeatureCollection
 from geopy.geocoders import Nominatim
 import pandas as pd
 

@@ -8,6 +8,7 @@
 #
 #
 
+
 class Lab(object):
     """Represents a Lab with the most common fields found."""
 

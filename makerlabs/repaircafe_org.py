@@ -16,7 +16,6 @@ from utils import format_labs_data
 import json
 import requests
 import re
-from geojson import dumps, Feature, Point, FeatureCollection
 import random
 from time import sleep
 from bs4 import BeautifulSoup

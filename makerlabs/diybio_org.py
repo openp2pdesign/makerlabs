@@ -16,7 +16,6 @@ from utils import format_labs_data
 import json
 from bs4 import BeautifulSoup
 import requests
-from geojson import dumps, Feature, Point, FeatureCollection
 import us
 import pandas as pd
 

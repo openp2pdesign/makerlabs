@@ -10,11 +10,11 @@
 
 
 from classes import Lab
+from utils import get_location
 from utils import format_labs_data
 
 import json
 import requests
-from geojson import dumps, Feature, Point, FeatureCollection
 import pycountry
 from time import sleep
 import pandas as pd
