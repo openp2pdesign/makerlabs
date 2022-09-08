@@ -141,12 +141,10 @@ def get_labs(format, open_cage_api_key):
 
     repaircafes_json = data_from_repaircafe_org()
     repaircafes = {}
-    print(repaircafes_json)
 
     # Load all the Repair Cafes
     for i in repaircafes_json:
         current_lab = RepairCafe()
-        print(current_lab.name)
         current_lab.name = repaircafes_json[i]["title"]
         current_lab.slug = repaircafes_json[i]["slug"]
         if "Address" in repaircafes_json[i]:
@@ -164,15 +162,12 @@ def get_labs(format, open_cage_api_key):
             current_lab.links["twitter"] = repaircafes_json[i]["twitter"]
 
         # Check coordinates
-        if repaircafes_json[i]["location"][0] is not None:
-            current_lab.longitude = repaircafes_json[i]["location"][0]
-            print(repaircafes_json[i]["location"])
+        if repaircafes_json[i]["location"][1] is not None:
+            current_lab.longitude = repaircafes_json[i]["location"][1]
         else:
             current_lab.longitude = 0.0
-        if repaircafes_json[i]["location"][1] is not None:
-            current_lab.latitude = repaircafes_json[i]["location"][1]
-            print(repaircafes_json[i]["location"])
-            print()
+        if repaircafes_json[i]["location"][0] is not None:
+            current_lab.latitude = repaircafes_json[i]["location"][0]
         else:
             current_lab.latitude = 0.0
 
