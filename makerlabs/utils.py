@@ -44,7 +44,7 @@ def format_labs_data(format, labs):
     # Return an object
     elif format.lower() == "object" or format.lower() == "obj":
         output = labs
-    # Default: return an oject
+    # Default: return an object
     else:
         output = labs
     # Return a proper json
