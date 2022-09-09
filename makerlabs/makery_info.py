@@ -82,7 +82,7 @@ def get_labs(format, open_cage_api_key):
         labs[ip["name"]] = current_lab
 
     # Return formatted data
-    data = format_labs_data(format=format, labs=labs)
+    output = format_labs_data(format=format, labs=labs)
 
     return output
 
