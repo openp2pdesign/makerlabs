@@ -14,6 +14,7 @@ from geopy.geocoders import OpenCage
 from time import sleep
 import pycountry
 import json
+import pandas as pd
 
 
 def format_labs_data(format, labs):
