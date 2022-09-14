@@ -55,6 +55,7 @@ def get_labs(format, open_cage_api_key):
         current_lab.capabilities = ip["equipments"]
         current_lab.description = ip["activities"]
         current_lab.blurb = ip["type_lab"]
+        current_lab.lab_type = "Lab on makery.info - " + ip["type_lab"]
         current_lab.links = {"facebook": "", "twitter": "", "website": ""}
         current_lab.links["facebook"] = ip["facebook"]
         current_lab.links["twitter"] = ip["twitter"]
