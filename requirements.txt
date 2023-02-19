@@ -1,12 +1,12 @@
 beautifulsoup4==4.11.1
 bs4==0.0.1
-certifi==2021.10.8
+certifi==2022.12.7
 charset-normalizer==2.0.12
 geographiclib==1.52
 geojson==2.5.0
 geopy==2.2.0
 idna==3.3
-lxml==4.8.0
+lxml==4.9.2
 numpy==1.22.3
 pandas==1.4.2
 pathlib==1.0.1
