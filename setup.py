@@ -27,7 +27,7 @@ setup(
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.21.2',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.23.1',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'Repair Cafes',
               'Makers'],
     classifiers=[
