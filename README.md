@@ -24,4 +24,8 @@ Full documentation at [http://makerlabs.readthedocs.io/](http://makerlabs.readth
 This package continues the development of the discontinued packages *PyMakerspaces* at [https://pypi.python.org/pypi/PyMakerspaces/](https://pypi.python.org/pypi/PyMakerspaces/).
 
 ## Credits
+v0.14-v0.21.3:
 [![](doc/images/from_30.png)](https://ec.europa.eu/digital-agenda/en/news/22-new-caps-projects-horizon-2020)
+
+v0.23.2:
+The research behind this software has taken place at the Politecnico di Milano during Massimo Menichinelli's stay as Senior Resident Researcher from 01/02/2021 to 08/01/2022.
