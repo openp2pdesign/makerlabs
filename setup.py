@@ -1,5 +1,11 @@
 #from distutils.core import setup
 from setuptools import setup
+
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name='makerlabs',
     packages=['makerlabs'],
@@ -16,7 +22,8 @@ setup(
         "pycountry"
     ],
     version='0.23.0',
-    description='A python library for accessing online data about Makerspaces, Fab Labs, Hackerspaces, TechShop...',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
