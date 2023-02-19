@@ -11,6 +11,7 @@ setup(
     packages=['makerlabs'],
     install_requires=[
         "kitchen",
+        "pathlib",
         "requests",
         "wsgiref",
         "geojson",
@@ -21,7 +22,7 @@ setup(
         "us",
         "pycountry"
     ],
-    version='0.23.0',
+    version='0.23.1',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Massimo Menichinelli',
