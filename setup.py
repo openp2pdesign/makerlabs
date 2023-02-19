@@ -12,8 +12,6 @@ setup(
     install_requires=[
         "bs4",
         "certifi",
-        "charset-normalizer",
-        "geographiclib"
         "geojson",
         "geopy",
         "idna",
@@ -29,13 +27,13 @@ setup(
         "soupsieve",
         "urllib3"
     ],
-    version='0.23.3',
+    version='0.3',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.23.3',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.3',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'Repair Cafes',
               'Makers'],
     classifiers=[

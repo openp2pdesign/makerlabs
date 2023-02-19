@@ -11,12 +11,9 @@
 # Import all the mapped platforms
 from . import diybio_org
 from . import fablabs_io
-from . import makeinitaly_foundation
 from . import hackaday_io
 from . import hackerspaces_org
 from . import makery_info
-from . import nesta
-from . import techshop_ws
 
 import pandas as pd
 

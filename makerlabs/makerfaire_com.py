@@ -9,9 +9,9 @@
 #
 
 
-from classes import Faire
-from utils import get_location
-from utils import format_labs_data
+from . classes import Faire
+from . utils import get_location
+from . utils import format_labs_data
 
 import json
 from urllib.request import Request, urlopen

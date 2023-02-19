@@ -9,9 +9,9 @@
 #
 
 
-from classes import Lab
-from utils import get_location
-from utils import format_labs_data
+from . classes import Lab
+from . utils import get_location
+from . utils import format_labs_data
 
 import json
 from bs4 import BeautifulSoup

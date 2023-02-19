@@ -9,16 +9,14 @@
 #
 
 
-from classes import Lab
-from utils import format_labs_data
+from . classes import Lab
+from . utils import get_location
+from . utils import format_labs_data
 
 import json
 import requests
 from geopy.geocoders import Nominatim
 import pandas as pd
-
-# Geocoding variable
-geolocator = Nominatim()
 
 
 # Endpoints
@@ -54,7 +52,7 @@ def data_from_hackaday_io(endpoint):
     return data
 
 
-def get_labs(format):
+def get_labs(format, open_cage_api_key):
     """Gets Hackerspaces data from hackaday.io."""
 
     hackerspaces_json = data_from_hackaday_io(hackaday_io_labs_map_url)
@@ -77,21 +75,22 @@ def get_labs(format):
             latlon = json.loads(i["latlon"])
             current_lab.latitude = latlon["lat"]
             current_lab.longitude = latlon["lng"]
-            # Get country, county and city from them
-            country = geolocator.reverse(
-                [latlon["lat"], latlon["lng"]])
-            current_lab.country = country.raw[
-                "address"]["country"]
-            current_lab.address = country.raw["display_name"]
-            current_lab.address_1 = country.raw["display_name"]
-            current_lab.country_code = country.raw[
-                "address"]["country_code"]
-            current_lab.county = country.raw[
-                "address"]["state_district"]
-            current_lab.city = country.raw[
-                "address"]["city"]
-            current_lab.postal_code = country.raw[
-                "address"]["postcode"]
+            # Get location
+            location = get_location(query=(
+                current_lab.latitude,
+                current_lab.longitude),
+                format="reverse",
+                api_key=open_cage_api_key)
+
+            current_lab.address_1 = location["address_1"]
+            current_lab.city = location["city"]
+            current_lab.country_code = location["country_code"]
+            current_lab.country = location["country"]
+            current_lab.county = location["county"]
+            current_lab.postal_code = location["postal_code"]
+            current_lab.continent = location["continent"]
+            current_lab.state = location["state"]
+
         else:
             # For labs without a location or coordinates
             # add 0,0 as coordinates
