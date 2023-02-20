@@ -15,6 +15,7 @@ setup(
         "geojson",
         "geopy",
         "idna",
+        "jellyfish",
         "lxml",
         "numpy",
         "pandas",
@@ -25,7 +26,8 @@ setup(
         "requests",
         "six",
         "soupsieve",
-        "urllib3"
+        "urllib3",
+        "us"
     ],
     version='0.3',
     long_description=long_description,
