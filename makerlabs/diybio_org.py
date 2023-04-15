@@ -35,7 +35,7 @@ class DiyBioLab(Lab):
         self.lab_type = "DIYBio Lab"
 
 
-def data_from_diybio_org():
+def data_from_diybio_org(API_endpoint):
     """Scrapes data from diybio.org."""
 
     r = requests.get(API_endpoint)
@@ -52,7 +52,7 @@ def data_from_diybio_org():
 def get_labs(format, open_cage_api_key):
     """Gets DIYBio Lab data from diybio.org."""
 
-    diybiolabs_soup = data_from_diybio_org()
+    diybiolabs_soup = data_from_diybio_org(API_endpoint)
     diybiolabs = {}
 
     rows_list = []
@@ -105,7 +105,10 @@ def get_labs(format, open_cage_api_key):
                 else:
                     current_lab.country_code = rows_list[j][2].contents[
                         0].encode('utf-8')
-                current_lab.url = rows_list[j][3].contents[0].attrs['href']
+                try:
+                    current_lab.url = rows_list[j][3].contents[0].attrs['href']
+                except:
+                    current_lab.url = rows_list[j][3].contents[0]
                 # Each lab is identified by the simplified url
                 slug = current_lab.url
                 if "http://" in slug:
@@ -123,7 +126,7 @@ def get_labs(format, open_cage_api_key):
                     current_lab.country_code = "USA"
                     current_lab.country = "United States of America"
                     current_lab.state = us.states.lookup(
-                        current_lab.state).name
+                        current_lab.state.decode('utf-8')).name
 
                 # Get address from city
                 address = get_location(query=current_lab.city, format="direct", api_key=open_cage_api_key)
