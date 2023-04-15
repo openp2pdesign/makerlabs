@@ -40,14 +40,14 @@ def data_from_fablabs_io(API_endpoint):
     return data
 
 
-def get_labs(format):
+def get_labs(format, open_cage_api_key):
     """Gets Fab Lab data from fablabs.io."""
 
     fablabs_json = data_from_fablabs_io(API_endpoint)
     labs = {}
 
     # Load all the FabLabs
-    for i in fablabs_json["labs"]:
+    for i in fablabs_json:
         current_lab = FabLab()
         current_lab.name = i["name"]
         current_lab.address_1 = i["address_1"]
@@ -67,14 +67,6 @@ def get_labs(format):
         current_lab.phone = i["phone"]
         current_lab.postal_code = i["postal_code"]
         current_lab.slug = i["slug"]
-        current_lab.url = i["url"]
-
-        continent_code = pycountry.country_alpha2_to_continent_code(i["country_code"])
-        current_lab.continent = pycountry.convert_continent_code_to_continent_name(continent_code)
-
-        current_country = pycountry.countries.get(alpha_2=i["country_code"].upper())
-        current_lab.country_code = current_country.alpha_3
-        current_lab.country = current_country.name
 
         # Check coordinates
         if i["longitude"] is not None:
@@ -86,6 +78,26 @@ def get_labs(format):
         else:
             current_lab.latitude = 0.0
 
+        # Get address from coordinates
+        # Try, in case there are issues with some coordinates formatting
+        try:
+            location = get_location(query=(
+                current_lab.latitude,
+                current_lab.longitude),
+                format="reverse",
+                api_key=open_cage_api_key)
+
+            current_lab.address_1 = location["address_1"]
+            current_lab.city = location["city"]
+            current_lab.country_code = location["country_code"]
+            current_lab.country = location["country"]
+            current_lab.county = location["county"]
+            current_lab.postal_code = location["postal_code"]
+            current_lab.continent = location["continent"]
+            current_lab.state = location["state"]
+        except:
+            pass
+
         # Find Facebook and Twitter links, add also the other ones
         current_lab.links = {"facebook": "", "twitter": ""}
         for link in i["links"]:
@@ -95,6 +107,7 @@ def get_labs(format):
                 current_lab.links["twitter"] = link["url"]
             else:
                 current_lab.links[link["id"]] = link["url"]
+                current_lab.url = link["url"]
 
         # Add the lab to the list
         labs[i["slug"]] = current_lab
