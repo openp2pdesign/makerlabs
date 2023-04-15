@@ -31,15 +31,15 @@ setup(
         "urllib3",
         "us"
     ],
-    version='0.30',
+    version='0.31',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.30',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.31',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'Repair Cafes',
-              'Makers'],
+              'Makers', 'DIYbio'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
