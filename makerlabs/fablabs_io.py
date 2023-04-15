@@ -32,7 +32,7 @@ class FabLab(Lab):
         self.lab_type = "Fab Lab"
 
 
-def data_from_fablabs_io():
+def data_from_fablabs_io(API_endpoint):
     """Gets data from fablabs.io."""
 
     data = requests.get(API_endpoint).json()
