@@ -17,6 +17,8 @@ import json
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 # Endpoints
 API_endpoint = "https://wiki.hackerspaces.org/w/api.php"
@@ -82,6 +84,10 @@ def get_labs(format, open_cage_api_key):
             "formatversion": "2",
             "format": "json"
         }
+        retry_strategy = Retry(total=3,backoff_factor=1)
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        req.mount("https://", adapter)
+        req.mount("http://", adapter)
         request_data = req.get(url=API_endpoint, params=params).json()
         current_lab.name = request_data['parse']['title']
         current_lab.links = {"facebook": "", "twitter": ""}
