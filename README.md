@@ -25,7 +25,8 @@ This package continues the development of the discontinued packages *PyMakerspac
 
 ## Credits
 v0.14-v0.21.3:
+The research behind this software has taken place during the H2020 MAKE-IT project.
 [![](doc/images/from_30.png)](https://ec.europa.eu/digital-agenda/en/news/22-new-caps-projects-horizon-2020)
 
-v0.30:
+v0.3x:
 The research behind this software has taken place at the Politecnico di Milano during Massimo Menichinelli's stay as Senior Resident Researcher from 01/02/2021 to 08/01/2022.

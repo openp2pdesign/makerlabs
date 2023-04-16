@@ -31,13 +31,13 @@ setup(
         "urllib3",
         "us"
     ],
-    version='0.31',
+    version='0.32',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Massimo Menichinelli',
     author_email='info@openp2pdesign.org',
     url='https://github.com/openp2pdesign/makerlabs',
-    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.31',
+    download_url='https://github.com/openp2pdesign/makerlabs/releases/tag/v0.32',
     keywords=['Fab Lab', 'Fab Lab', 'Makerspace', 'Hackerspace', 'Repair Cafes',
               'Makers', 'DIYbio'],
     classifiers=[
