@@ -19,7 +19,7 @@ import pandas as pd
 
 
 # Endpoints
-API_endpoint = "https://makerspaces.make.co/wp-json/makemap/v1/mapdata/5"
+API_endpoint = "https://makerspace.com/wp-json/makemap/v1/mapdata/5"
 
 
 class Makerspace(Lab):
